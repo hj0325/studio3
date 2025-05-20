@@ -41,9 +41,9 @@ const imagesData = [
     style: {
       ...imageStyles,
       zIndex: 1,
-      left: '2%', // 좌우로 더 넓게
-      bottom: '0%',
-      height: '95%', // 약간 더 길게
+      left: '-33%', // 좌우로 더 넓게
+      bottom: '3%',
+      height: '125%', // 약간 더 길게
       width: 'auto',
     },
   },
@@ -53,11 +53,11 @@ const imagesData = [
     style: {
       ...imageStyles,
       zIndex: 1,
-      right: '2%', // 좌우로 더 넓게
-      bottom: '0%',
-      height: '95%', // 약간 더 길게
+      right: '-33%', // 좌우로 더 넓게
+      bottom: '3%',
+      height: '125%', // 약간 더 길게
       width: 'auto',
-      transform: 'scaleX(-1)',
+      transform: 'scaleX(1)',
     },
   },
   {
@@ -66,9 +66,9 @@ const imagesData = [
     style: {
       ...imageStyles,
       zIndex: 2,
-      left: '8%', // 좌우로 더 넓게
-      bottom: '0%',
-      height: '75%', // 크기 조정
+      left: '-17%', // 좌우로 더 넓게
+      bottom: '-10%',
+      height: '70%', // 크기 조정
       width: 'auto',
     },
   },
@@ -78,9 +78,9 @@ const imagesData = [
     style: {
       ...imageStyles,
       zIndex: 2,
-      right: '8%', // 좌우로 더 넓게
-      bottom: '0%',
-      height: '75%', // 크기 조정
+      right: '-17%', // 좌우로 더 넓게
+      bottom: '-10%',
+      height: '70%', // 크기 조정
       width: 'auto',
       transform: 'scaleX(-1)',
     },
@@ -92,8 +92,8 @@ const imagesData = [
       ...imageStyles,
       zIndex: 3,
       left: '50%',
-      bottom: '2%', // 약간 위로
-      height: '30%', // 크기 조정
+      bottom: '6%', // 약간 위로
+      height: '25%', // 크기 조정
       width: 'auto',
       transform: 'translateX(-50%)',
     },
@@ -104,9 +104,9 @@ const imagesData = [
     style: {
       ...imageStyles,
       zIndex: 4,
-      left: '20%', // 좌우로 더 넓게
-      bottom: '5%', // 약간 위로
-      height: '70%', // 크기 조정
+      left: '-2%', // 좌우로 더 넓게
+      bottom: '4%', // 약간 위로
+      height: '83%', // 크기 조정
       width: 'auto',
     },
   },
@@ -116,9 +116,9 @@ const imagesData = [
     style: {
       ...imageStyles,
       zIndex: 4,
-      right: '20%', // 좌우로 더 넓게
-      bottom: '5%', // 약간 위로
-      height: '70%', // 크기 조정
+      right: '-2%', // 좌우로 더 넓게
+      bottom: '4%', // 약간 위로
+      height: '83%', // 크기 조정
       width: 'auto',
       transform: 'scaleX(-1)',
     },
@@ -130,21 +130,8 @@ const imagesData = [
       ...imageStyles,
       zIndex: 5,
       left: '50%',
-      top: '50%', // Y축 중앙으로 더 이동
-      height: '45%', // 크기 조정
-      width: 'auto',
-      transform: 'translate(-50%, -50%)',
-    },
-  },
-  {
-    src: '/New studio/바야 로고.png',
-    alt: '상단 중앙 문양',
-    style: {
-      ...imageStyles,
-      zIndex: 6,
-      left: '50%',
-      top: '12%', // 약간 아래로
-      height: '20%', // 크기 조정
+      top: '16%', // Y축 중앙으로 더 이동
+      height: '25%', // 크기 조정
       width: 'auto',
       transform: 'translate(-50%, -50%)',
     },
@@ -155,9 +142,9 @@ const imagesData = [
     style: {
       ...imageStyles,
       zIndex: 7,
-      left: '10%', // 좌우로 더 넓게
-      top: '2%',
-      height: '18%', // 크기 조정
+      left: '-10%', // 좌우로 더 넓게
+      top: '0%',
+      height: '50%', // 크기 조정
       width: 'auto',
     },
   },
@@ -167,9 +154,21 @@ const imagesData = [
     style: {
       ...imageStyles,
       zIndex: 7,
-      left: '18%', // 좌우로 더 넓게
-      top: '5%',
-      height: '15%', // 크기 조정
+      left: '0%', // 좌우로 더 넓게
+      top: '0%',
+      height: '40%', // 크기 조정
+      width: 'auto',
+    },
+  },
+  {
+    src: '/New studio/종 복사본.png', // 이미지 교체
+    alt: '종 2',
+    style: {
+      ...imageStyles,
+      zIndex: 7,
+      left: '28%', // 좌우로 더 넓게
+      top: '-3%',
+      height: '40%', // 크기 조정
       width: 'auto',
     },
   },
@@ -179,10 +178,23 @@ const imagesData = [
     style: {
       ...imageStyles,
       zIndex: 7,
-      right: '10%', // 좌우로 더 넓게
-      top: '2%',
-      height: '18%', // 크기 조정
+      right: '-18%', // 좌우로 더 넓게
+      top: '0%',
+      height: '50%', // 크기 조정
       width: 'auto',
+    },
+  },
+  {
+    src: '/New studio/종 복사본.png', // 이미지 교체
+    alt: '종 3',
+    style: {
+      ...imageStyles,
+      zIndex: 7,
+      right: '28%', // 좌우로 더 넓게
+      top: '-3%',
+      height: '40%', // 크기 조정
+      width: 'auto',
+      transform: 'scaleX(-1)',
     },
   },
   {
@@ -191,9 +203,9 @@ const imagesData = [
     style: {
       ...imageStyles,
       zIndex: 7,
-      right: '18%', // 좌우로 더 넓게
-      top: '5%',
-      height: '15%', // 크기 조정
+      right: '-7%', // 좌우로 더 넓게
+      top: '0%',
+      height: '40%', // 크기 조정
       width: 'auto',
     },
   },
