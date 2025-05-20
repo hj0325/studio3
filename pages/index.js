@@ -36,15 +36,30 @@ const imagesData = [
     },
   },
   {
+    src: '/New studio/바닥 그룹.png',
+    alt: '바닥 그룹',
+    style: {
+      ...imageStyles,
+      zIndex: 0,
+      left: '0%',
+      bottom: '0%',
+      width: '100%',
+      height: '12%',
+      objectFit: 'cover',
+      objectPosition: 'center bottom',
+    },
+  },
+  {
     src: '/New studio/기둥.png',
     alt: '왼쪽 기둥',
     style: {
       ...imageStyles,
       zIndex: 1,
-      left: '-33%', // 좌우로 더 넓게
+      left: '-33%',
       bottom: '3%',
-      height: '125%', // 약간 더 길게
+      height: '125%',
       width: 'auto',
+      transform: 'scaleX(-1)'
     },
   },
   {
@@ -53,9 +68,9 @@ const imagesData = [
     style: {
       ...imageStyles,
       zIndex: 1,
-      right: '-33%', // 좌우로 더 넓게
+      right: '-33%',
       bottom: '3%',
-      height: '125%', // 약간 더 길게
+      height: '125%',
       width: 'auto',
       transform: 'scaleX(1)',
     },
@@ -66,9 +81,9 @@ const imagesData = [
     style: {
       ...imageStyles,
       zIndex: 2,
-      left: '-17%', // 좌우로 더 넓게
+      left: '-17%',
       bottom: '-10%',
-      height: '70%', // 크기 조정
+      height: '70%',
       width: 'auto',
     },
   },
@@ -78,9 +93,9 @@ const imagesData = [
     style: {
       ...imageStyles,
       zIndex: 2,
-      right: '-17%', // 좌우로 더 넓게
+      right: '-17%',
       bottom: '-10%',
-      height: '70%', // 크기 조정
+      height: '70%',
       width: 'auto',
       transform: 'scaleX(-1)',
     },
@@ -92,33 +107,33 @@ const imagesData = [
       ...imageStyles,
       zIndex: 3,
       left: '50%',
-      bottom: '6%', // 약간 위로
-      height: '25%', // 크기 조정
+      bottom: '6%',
+      height: '25%',
       width: 'auto',
       transform: 'translateX(-50%)',
     },
   },
   {
-    src: '/New studio/흉상 옆.png', // 이미지 교체
+    src: '/New studio/흉상 옆.png',
     alt: '왼쪽 흉상',
     style: {
       ...imageStyles,
       zIndex: 4,
-      left: '-2%', // 좌우로 더 넓게
-      bottom: '4%', // 약간 위로
-      height: '83%', // 크기 조정
+      left: '-2%',
+      bottom: '4%',
+      height: '83%',
       width: 'auto',
     },
   },
   {
-    src: '/New studio/흉상 옆.png', // 이미지 교체
+    src: '/New studio/흉상 옆.png',
     alt: '오른쪽 흉상',
     style: {
       ...imageStyles,
       zIndex: 4,
-      right: '-2%', // 좌우로 더 넓게
-      bottom: '4%', // 약간 위로
-      height: '83%', // 크기 조정
+      right: '-2%',
+      bottom: '4%',
+      height: '83%',
       width: 'auto',
       transform: 'scaleX(-1)',
     },
@@ -130,82 +145,83 @@ const imagesData = [
       ...imageStyles,
       zIndex: 5,
       left: '50%',
-      top: '16%', // Y축 중앙으로 더 이동
-      height: '25%', // 크기 조정
+      top: '16%',
+      height: '25%',
       width: 'auto',
       transform: 'translate(-50%, -50%)',
     },
   },
   {
-    src: '/New studio/종 복사본.png', // 이미지 교체
+    src: '/New studio/종 복사본.png',
     alt: '종 1',
     style: {
       ...imageStyles,
       zIndex: 7,
-      left: '-10%', // 좌우로 더 넓게
+      left: '-10%',
       top: '0%',
-      height: '50%', // 크기 조정
+      height: '50%',
       width: 'auto',
     },
   },
   {
-    src: '/New studio/종 복사본.png', // 이미지 교체
+    src: '/New studio/종 복사본.png',
     alt: '종 2',
     style: {
       ...imageStyles,
       zIndex: 7,
-      left: '0%', // 좌우로 더 넓게
+      left: '0%',
       top: '0%',
-      height: '40%', // 크기 조정
+      height: '40%',
       width: 'auto',
     },
   },
   {
-    src: '/New studio/종 복사본.png', // 이미지 교체
-    alt: '종 2',
-    style: {
-      ...imageStyles,
-      zIndex: 7,
-      left: '28%', // 좌우로 더 넓게
-      top: '-3%',
-      height: '40%', // 크기 조정
-      width: 'auto',
-    },
-  },
-   {
-    src: '/New studio/종 복사본.png', // 이미지 교체
+    src: '/New studio/종 복사본.png',
     alt: '종 3',
     style: {
       ...imageStyles,
       zIndex: 7,
-      right: '-18%', // 좌우로 더 넓게
-      top: '0%',
-      height: '50%', // 크기 조정
-      width: 'auto',
-    },
-  },
-  {
-    src: '/New studio/종 복사본.png', // 이미지 교체
-    alt: '종 3',
-    style: {
-      ...imageStyles,
-      zIndex: 7,
-      right: '28%', // 좌우로 더 넓게
+      right: '28%',
       top: '-3%',
-      height: '40%', // 크기 조정
+      height: '40%',
       width: 'auto',
       transform: 'scaleX(-1)',
     },
   },
   {
-    src: '/New studio/종 복사본.png', // 이미지 교체
+    src: '/New studio/종 복사본.png',
+    alt: '종 3',
+    style: {
+      ...imageStyles,
+      zIndex: 7,
+      right: '39%',
+      top: '-3%',
+      height: '40%',
+      width: 'auto',
+      transform: 'scaleX(1)',
+    },
+  },
+  {
+    src: '/New studio/종 복사본.png',
     alt: '종 4',
     style: {
       ...imageStyles,
       zIndex: 7,
-      right: '-7%', // 좌우로 더 넓게
+      right: '-18%',
       top: '0%',
-      height: '40%', // 크기 조정
+      height: '50%',
+      width: 'auto',
+    },
+  },
+  {
+    src: '/New studio/종 복사본.png',
+    alt: '종 5',
+    style: {
+      ...imageStyles,
+      zIndex: 7,
+      right: '-7%',
+      top: '0%',
+      height: '40%',
       width: 'auto',
     },
   },
@@ -215,17 +231,17 @@ export default function HomePage() {
   return (
     <>
       <Head>
-        <title>Studio 3 Interactive Art</title> {/* 타이틀 변경 */}
+        <title>Studio 3 Interactive Art</title>
         <meta name="description" content="Interactive scroll animation project" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" /> {/* viewport 수정 */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <link rel="icon" href="/favicon.ico" />
         <style jsx global>{`
           html, body {
             padding: 0;
             margin: 0;
-            overflow: hidden; /* 전체 페이지 스크롤 방지 */
+            overflow: hidden;
             font-family: ${geistSans.style.fontFamily}, ${geistMono.style.fontFamily}, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-            background: #000; /* 기본 배경 검은색 */
+            background: #000;
           }
           * {
             box-sizing: border-box;
@@ -245,15 +261,16 @@ export default function HomePage() {
         }}
       >
         {imagesData.map((img, index) => (
-          <img // next/image 대신 기본 img 태그 사용으로 변경
+          <img 
             key={index}
             src={img.src}
             alt={img.alt}
-            style={img.style} // 인라인 스타일 직접 적용
-            draggable="false" // 이미지 드래그 방지
+            style={img.style} 
+            draggable="false"
           />
         ))}
       </main>
     </>
   );
 }
+
