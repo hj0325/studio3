@@ -81,7 +81,7 @@ const imagesData = [
     style: {
       ...imageStyles,
       zIndex: 2,
-      left: '-17%',
+      left: '-14%',
       bottom: '-10%',
       height: '70%',
       width: 'auto',
@@ -93,7 +93,7 @@ const imagesData = [
     style: {
       ...imageStyles,
       zIndex: 2,
-      right: '-17%',
+      right: '-14%',
       bottom: '-10%',
       height: '70%',
       width: 'auto',
@@ -114,13 +114,26 @@ const imagesData = [
     },
   },
   {
+    src: '/New studio/인센스.png',
+    alt: '인센스',
+    style: {
+      ...imageStyles,
+      zIndex: 3,
+      left: '50%',
+      bottom: '20.3%',
+      height: '30%',
+      width: 'auto',
+      transform: 'translateX(-50%)',
+    },
+  },
+  {
     src: '/New studio/흉상 옆.png',
     alt: '왼쪽 흉상',
     style: {
       ...imageStyles,
       zIndex: 4,
-      left: '-2%',
-      bottom: '4%',
+      left: '-3%',
+      bottom: '2%',
       height: '83%',
       width: 'auto',
     },
@@ -131,8 +144,8 @@ const imagesData = [
     style: {
       ...imageStyles,
       zIndex: 4,
-      right: '-2%',
-      bottom: '4%',
+      right: '-3%',
+      bottom: '2%',
       height: '83%',
       width: 'auto',
       transform: 'scaleX(-1)',
