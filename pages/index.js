@@ -2,7 +2,7 @@ import Head from "next/head";
 // import Image from "next/image"; // 현재 직접 img 태그를 사용하므로 Next/Image는 주석 처리
 import { Geist, Geist_Mono } from "next/font/google";
 // import styles from "@/styles/Home.module.css"; // 기본 스타일 시트 사용 안 함
-import React from 'react';
+import React, { useState } from 'react';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,7 +59,6 @@ const imagesData = [
       bottom: '3%',
       height: '125%',
       width: 'auto',
-      transform: 'scaleX(-1)'
     },
   },
   {
@@ -81,7 +80,7 @@ const imagesData = [
     style: {
       ...imageStyles,
       zIndex: 2,
-      left: '-14%',
+      left: '-17%',
       bottom: '-10%',
       height: '70%',
       width: 'auto',
@@ -93,7 +92,7 @@ const imagesData = [
     style: {
       ...imageStyles,
       zIndex: 2,
-      right: '-14%',
+      right: '-17%',
       bottom: '-10%',
       height: '70%',
       width: 'auto',
@@ -132,8 +131,8 @@ const imagesData = [
     style: {
       ...imageStyles,
       zIndex: 4,
-      left: '-3%',
-      bottom: '2%',
+      left: '-2%',
+      bottom: '4%',
       height: '83%',
       width: 'auto',
     },
@@ -144,8 +143,8 @@ const imagesData = [
     style: {
       ...imageStyles,
       zIndex: 4,
-      right: '-3%',
-      bottom: '2%',
+      right: '-2%',
+      bottom: '4%',
       height: '83%',
       width: 'auto',
       transform: 'scaleX(-1)',
@@ -203,7 +202,7 @@ const imagesData = [
   },
   {
     src: '/New studio/종 복사본.png',
-    alt: '종 3',
+    alt: '종 4',
     style: {
       ...imageStyles,
       zIndex: 7,
@@ -216,7 +215,7 @@ const imagesData = [
   },
   {
     src: '/New studio/종 복사본.png',
-    alt: '종 4',
+    alt: '종 5',
     style: {
       ...imageStyles,
       zIndex: 7,
@@ -228,7 +227,7 @@ const imagesData = [
   },
   {
     src: '/New studio/종 복사본.png',
-    alt: '종 5',
+    alt: '종 6',
     style: {
       ...imageStyles,
       zIndex: 7,
@@ -241,6 +240,12 @@ const imagesData = [
 ];
 
 export default function HomePage() {
+  const [isDimmed, setIsDimmed] = useState(false);
+
+  const handleScreenClick = () => {
+    setIsDimmed(true);
+  };
+
   return (
     <>
       <Head>
@@ -262,6 +267,7 @@ export default function HomePage() {
         `}</style>
       </Head>
       <main 
+        onClick={handleScreenClick}
         style={{
           fontFamily: `var(--font-geist-sans), var(--font-geist-mono)`,
           position: 'relative',
@@ -270,7 +276,8 @@ export default function HomePage() {
           margin: 0,
           padding: 0,
           overflow: 'hidden', 
-          background: '#000'
+          background: '#000',
+          cursor: 'pointer',
         }}
       >
         {imagesData.map((img, index) => (
@@ -282,6 +289,20 @@ export default function HomePage() {
             draggable="false"
           />
         ))}
+        <div 
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.95) 100%)',
+            opacity: isDimmed ? 1 : 0,
+            transition: 'opacity 0.7s ease-in-out',
+            pointerEvents: isDimmed ? 'auto' : 'none',
+            zIndex: 10,
+          }}
+        />
       </main>
     </>
   );
