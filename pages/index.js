@@ -250,6 +250,19 @@ const imagesData = [
       width: 'auto',
       transform: 'translateX(-50%)',
     },
+  },
+  {
+    src: '/New studio/이름.png',
+    alt: '이름',
+    style: {
+      ...imageStyles,
+      zIndex: 3,
+      left: '50%',
+      bottom: '71%',
+      height: '4%',
+      width: 'auto',
+      transform: 'translateX(-50%)',
+    },
   }
 ];
 
