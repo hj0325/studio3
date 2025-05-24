@@ -238,6 +238,19 @@ const imagesData = [
       width: 'auto',
     },
   },
+  {
+    src: '/New studio/바야 로고.png',
+    alt: '바야 로고',
+    style: {
+      ...imageStyles,
+      zIndex: 3,
+      left: '50%',
+      bottom: '22%',
+      height: '10%',
+      width: 'auto',
+      transform: 'translateX(-50%)',
+    },
+  }
 ];
 
 export default function HomePage() {
@@ -271,7 +284,6 @@ export default function HomePage() {
         <title>Studio 3 Interactive Art</title>
         <meta name="description" content="Interactive scroll animation project" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <link rel="icon" href="/favicon.ico" />
         <style jsx global>{`
           html, body {
             padding: 0;
@@ -306,8 +318,8 @@ export default function HomePage() {
             alt={img.alt}
             style={{
               ...img.style,
-              // 인센스.png만 dimStep에 따라 투명해지게 함
-              opacity: img.src === '/New studio/인센스.png' 
+              // 인센스.png와 바야 로고.png를 dimStep에 따라 투명하게 함
+              opacity: ['/New studio/인센스.png', '/New studio/바야 로고.png'].includes(img.src)
                 ? (dimStep < 0.5 ? 1 : 1 - (dimStep - 0.5) * 2)
                 : 1
             }} 
