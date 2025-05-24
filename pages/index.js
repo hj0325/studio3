@@ -316,9 +316,13 @@ export default function HomePage() {
             height: '100%',
             background: `radial-gradient(
               circle,
-              rgba(0,0,0,0) ${70 * (1 - dimStep)}%,
-              rgba(0,0,0,0.9) ${70 * (1 - dimStep) + 15}%,
-              rgba(0,0,0,1) ${70 * (1 - dimStep) + 30}%
+              rgba(0,0,0,0) ${100 * (1 - dimStep)}%,
+              rgba(0,0,0,0.1) ${100 * (1 - dimStep) + 5}%,
+              rgba(0,0,0,0.3) ${100 * (1 - dimStep) + 10}%,
+              rgba(0,0,0,0.6) ${100 * (1 - dimStep) + 15}%,
+              rgba(0,0,0,0.8) ${100 * (1 - dimStep) + 20}%,
+              rgba(0,0,0,0.95) ${100 * (1 - dimStep) + 25}%,
+              rgba(0,0,0,1) ${100 * (1 - dimStep) + 30}%
             )`,
             opacity: isDimmed ? 1 : 0,
             transition: 'opacity 0.3s ease-in-out',
