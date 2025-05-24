@@ -59,6 +59,7 @@ const imagesData = [
       bottom: '3%',
       height: '125%',
       width: 'auto',
+      transform: 'scaleX(-1)',
     },
   },
   {
@@ -303,7 +304,13 @@ export default function HomePage() {
             key={index}
             src={img.src}
             alt={img.alt}
-            style={img.style} 
+            style={{
+              ...img.style,
+              // 인센스.png만 dimStep에 따라 투명해지게 함
+              opacity: img.src === '/New studio/인센스.png' 
+                ? (dimStep < 0.5 ? 1 : 1 - (dimStep - 0.5) * 2)
+                : 1
+            }} 
             draggable="false"
           />
         ))}
