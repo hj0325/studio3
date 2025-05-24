@@ -2,7 +2,7 @@ import Head from "next/head";
 // import Image from "next/image"; // 현재 직접 img 태그를 사용하므로 Next/Image는 주석 처리
 import { Geist, Geist_Mono } from "next/font/google";
 // import styles from "@/styles/Home.module.css"; // 기본 스타일 시트 사용 안 함
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -79,7 +79,7 @@ const imagesData = [
     alt: '왼쪽 사자상',
     style: {
       ...imageStyles,
-      zIndex: 2,
+      zIndex: 5,
       left: '-17%',
       bottom: '-10%',
       height: '70%',
@@ -91,7 +91,7 @@ const imagesData = [
     alt: '오른쪽 사자상',
     style: {
       ...imageStyles,
-      zIndex: 2,
+      zIndex: 5,
       right: '-17%',
       bottom: '-10%',
       height: '70%',
@@ -241,28 +241,10 @@ const imagesData = [
 
 export default function HomePage() {
   const [isDimmed, setIsDimmed] = useState(false);
-  const [dimStep, setDimStep] = useState(0);
 
   const handleScreenClick = () => {
     setIsDimmed(true);
   };
-
-  useEffect(() => {
-    if (isDimmed) {
-      let step = 0;
-      const interval = setInterval(() => {
-        step += 0.015;
-        if (step >= 1) {
-          step = 1;
-          clearInterval(interval);
-        }
-        setDimStep(step);
-      }, 16);
-      return () => clearInterval(interval);
-    } else {
-      setDimStep(0);
-    }
-  }, [isDimmed]);
 
   return (
     <>
@@ -298,15 +280,37 @@ export default function HomePage() {
           cursor: 'pointer',
         }}
       >
-        {imagesData.map((img, index) => (
-          <img 
-            key={index}
-            src={img.src}
-            alt={img.alt}
-            style={img.style} 
-            draggable="false"
-          />
-        ))}
+        {imagesData.map((img, index) => {
+          let currentImgStyle = { ...img.style };
+
+          if (img.alt === '왼쪽 흉상' || img.alt === '오른쪽 흉상') {
+            // 기본 transition을 설정 (기존 transition이 있다면 유지하고 추가, 없다면 새로 설정)
+            const baseTransition = currentImgStyle.transition || '';
+            const transformTransition = 'transform 5s ease-in-out';
+            currentImgStyle.transition = baseTransition ? `${baseTransition}, ${transformTransition}` : transformTransition;
+            
+            if (isDimmed) {
+              if (img.alt === '왼쪽 흉상') {
+                currentImgStyle.transform = `translateX(-150%) ${img.style.transform || ''}`.trim();
+              } else { // 오른쪽 흉상
+                currentImgStyle.transform = `translateX(150%) ${img.style.transform || ''}`.trim();
+              }
+            } else {
+              // isDimmed가 false일 때 (초기 상태) 원래 transform 값으로 설정
+              currentImgStyle.transform = img.style.transform || 'none';
+            }
+          }
+
+          return (
+            <img 
+              key={index}
+              src={img.src}
+              alt={img.alt}
+              style={currentImgStyle} 
+              draggable="false"
+            />
+          );
+        })}
         <div 
           style={{
             position: 'absolute',
@@ -314,14 +318,9 @@ export default function HomePage() {
             left: 0,
             width: '100%',
             height: '100%',
-            background: `radial-gradient(
-              circle,
-              rgba(0,0,0,0) ${70 * (1 - dimStep)}%,
-              rgba(0,0,0,0.9) ${70 * (1 - dimStep) + 15}%,
-              rgba(0,0,0,1) ${70 * (1 - dimStep) + 30}%
-            )`,
+            background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.95) 100%)',
             opacity: isDimmed ? 1 : 0,
-            transition: 'opacity 0.3s ease-in-out',
+            transition: 'opacity 0.7s ease-in-out',
             pointerEvents: isDimmed ? 'auto' : 'none',
             zIndex: 10,
           }}
