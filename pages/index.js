@@ -269,11 +269,11 @@ const imagesData = [
 export default function HomePage() {
   const [isDimmed, setIsDimmed] = useState(false);
   const [dimStep, setDimStep] = useState(0);
-  const [animationStage, setAnimationStage] = useState('initial'); // 'initial', 'blurring', 'logoShowing', 'fadingOut', 'finished'
+  const [animationStage, setAnimationStage] = useState('initial'); // 'initial', 'blurring', 'logoShowing', 'fadingOut', 'finished', 'showingIntro', 'introFadingOut', 'introFinished'
 
   const handleScreenClick = () => {
-    // 애니메이션이 완료된 상태에서는 클릭 무시
-    if (animationStage === 'finished') return;
+    // 애니메이션이 완료된 상태나 소개글 단계에서는 클릭 무시
+    if (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut' || animationStage === 'introFinished') return;
     
     setIsDimmed(true);
     setAnimationStage('blurring');
@@ -318,6 +318,51 @@ export default function HomePage() {
           setAnimationStage('finished');
         }
         setFadeStep(step);
+      }, 16);
+      return () => clearInterval(interval);
+    }
+  }, [animationStage]);
+
+  // 소개글 애니메이션을 위한 state
+  const [introOpacity, setIntroOpacity] = useState(0);
+
+  // finished 상태 후 소개글 표시 로직
+  useEffect(() => {
+    if (animationStage === 'finished') {
+      const timer = setTimeout(() => {
+        setAnimationStage('showingIntro');
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [animationStage]);
+
+  // 소개글 애니메이션 로직
+  useEffect(() => {
+    if (animationStage === 'showingIntro') {
+      let opacity = 0;
+      const interval = setInterval(() => {
+        opacity += 0.02; // 천천히 나타남
+        if (opacity >= 1) {
+          opacity = 1;
+          clearInterval(interval);
+          // 3초 후 페이드아웃 시작
+          setTimeout(() => {
+            setAnimationStage('introFadingOut');
+          }, 3000);
+        }
+        setIntroOpacity(opacity);
+      }, 16);
+      return () => clearInterval(interval);
+    } else if (animationStage === 'introFadingOut') {
+      let opacity = 1;
+      const interval = setInterval(() => {
+        opacity -= 0.02; // 천천히 사라짐
+        if (opacity <= 0) {
+          opacity = 0;
+          clearInterval(interval);
+          setAnimationStage('introFinished');
+        }
+        setIntroOpacity(opacity);
       }, 16);
       return () => clearInterval(interval);
     }
@@ -421,6 +466,25 @@ export default function HomePage() {
           }} 
           draggable="false"
         />
+        
+        {/* 소개글 */}
+        <img 
+          src="/New studio/소개글.png"
+          alt="소개글"
+          style={{
+            position: 'absolute',
+            zIndex: 30,
+            left: '50%',
+            top: '50%',
+            height: '20.5%',
+            width: 'auto',
+            transform: 'translate(-50%, -50%)',
+            opacity: introOpacity,
+            userSelect: 'none',
+            WebkitUserDrag: 'none',
+          }} 
+          draggable="false"
+        />
         <div 
           style={{
             position: 'absolute',
@@ -455,9 +519,9 @@ export default function HomePage() {
             width: '100%',
             height: '100%',
             background: '#000',
-            opacity: animationStage === 'finished' ? 1 : 0,
+            opacity: (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut') ? 1 : 0,
             transition: 'opacity 0.5s ease-in-out',
-            pointerEvents: animationStage === 'finished' ? 'auto' : 'none',
+            pointerEvents: (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut') ? 'auto' : 'none',
             zIndex: 20,
           }}
         />
