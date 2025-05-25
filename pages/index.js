@@ -272,11 +272,20 @@ export default function HomePage() {
   const [animationStage, setAnimationStage] = useState('initial'); // 'initial', 'blurring', 'logoShowing', 'fadingOut', 'finished', 'showingIntro', 'introFadingOut', 'introFinished', 'nextScreen'
 
   const handleScreenClick = () => {
-    // 애니메이션이 완료된 상태나 소개글 단계에서는 클릭 무시
-    if (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut' || animationStage === 'introFinished' || animationStage === 'nextScreen') return;
+    // 애니메이션이 완료된 상태나 소개글 단계에서는 클릭 무시 (nextScreen은 제외)
+    if (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut' || animationStage === 'introFinished') return;
     
     setIsDimmed(true);
     setAnimationStage('blurring');
+  };
+
+  // 첫화면으로 돌아가는 함수
+  const resetToFirstScreen = () => {
+    setIsDimmed(false);
+    setDimStep(0);
+    setFadeStep(0);
+    setIntroOpacity(0);
+    setAnimationStage('initial');
   };
 
   useEffect(() => {
@@ -375,6 +384,27 @@ export default function HomePage() {
         setAnimationStage('nextScreen');
       }, 1000);
       return () => clearTimeout(timer);
+    }
+  }, [animationStage]);
+
+  // 다음 화면 이미지들의 동시 등장을 위한 opacity state
+  const [nextScreenOpacity, setNextScreenOpacity] = useState(0);
+
+  // 다음 화면 등장 애니메이션
+  useEffect(() => {
+    if (animationStage === 'nextScreen') {
+      let opacity = 0;
+      const interval = setInterval(() => {
+        opacity += 0.05; // 빠르게 나타남
+        if (opacity >= 1) {
+          opacity = 1;
+          clearInterval(interval);
+        }
+        setNextScreenOpacity(opacity);
+      }, 16);
+      return () => clearInterval(interval);
+    } else {
+      setNextScreenOpacity(0);
     }
   }, [animationStage]);
 
@@ -561,6 +591,7 @@ export default function HomePage() {
                 objectFit: 'cover',
                 userSelect: 'none',
                 WebkitUserDrag: 'none',
+                opacity: nextScreenOpacity,
               }}
               draggable="false"
             />
@@ -578,6 +609,7 @@ export default function HomePage() {
                 height: '12%',
                 objectFit: 'cover',
                 objectPosition: 'center bottom',
+                opacity: nextScreenOpacity,
               }}
               draggable="false"
             />
@@ -588,13 +620,14 @@ export default function HomePage() {
               alt="종"
               style={{
                 ...imageStyles,
-                zIndex: 10,
+                zIndex: 1,
                 left: '50%',
                 top: '57%',
                 width: 'auto',
                 height: '85%',
                 objectFit: 'contain',
                 transform: 'translate(-50%, -50%)',
+                opacity: nextScreenOpacity,
               }}
               draggable="false"
             />
@@ -605,30 +638,52 @@ export default function HomePage() {
               alt="새 인간"
               style={{
                 ...imageStyles,
-                zIndex: 10,
+                zIndex: 1,
                 left: '30%',
                 top: '70%',
                 width: 'auto',
                 height: '55%',
                 objectFit: 'contain',
                 transform: 'translate(-50%, -50%)',
+                opacity: nextScreenOpacity,
               }}
               draggable="false"
             />
 
-            {/* 새 인간2 */}
+             {/* 새 인간2 */}
             <img 
               src="/New studio/새 인간.png"
               alt="새 인간"
               style={{
                 ...imageStyles,
-                zIndex: 10,
+                zIndex: 1,
                 left: '47%',
                 top: '43%',
                 width: 'auto',
                 height: '55%',
                 objectFit: 'contain',
                 transform: 'scaleX(-1)',
+                opacity: nextScreenOpacity,
+              }}
+              draggable="false"
+            />
+
+             {/* 문양 - 첫화면으로 돌아가는 버튼 */}
+             <img 
+              src="/New studio/문양.png"
+              alt="문양"
+              onClick={resetToFirstScreen}
+              style={{
+                ...imageStyles,
+                zIndex: 2,
+                left: '0%',
+                top: '3%',
+                width: 'auto',
+                height: '15%',
+                objectFit: 'contain',
+                transform: 'scaleX(-1)',
+                opacity: nextScreenOpacity,
+                cursor: 'pointer',
               }}
               draggable="false"
             />
