@@ -465,7 +465,7 @@ export default function HomePage() {
             zIndex: 25,
             left: '50%',
             top: '50%',
-            height: '20.7%',
+            height: '20%',
             width: 'auto',
             transform: 'translate(-50%, -50%)',
             opacity: animationStage === 'logoShowing' ? 1 : 
@@ -561,7 +561,75 @@ export default function HomePage() {
                 objectFit: 'cover',
                 userSelect: 'none',
                 WebkitUserDrag: 'none',
-              }} 
+              }}
+              draggable="false"
+            />
+            
+            {/* 바닥 그룹 */}
+            <img 
+              src="/New studio/바닥 그룹.png"
+              alt="바닥 그룹"
+              style={{
+                ...imageStyles,
+                zIndex: 1,
+                left: '0%',
+                bottom: '0%',
+                width: '100%',
+                height: '12%',
+                objectFit: 'cover',
+                objectPosition: 'center bottom',
+              }}
+              draggable="false"
+            />
+
+             {/* 종 */}
+             <img 
+              src="/New studio/종.png"
+              alt="종"
+              style={{
+                ...imageStyles,
+                zIndex: 10,
+                left: '50%',
+                top: '57%',
+                width: 'auto',
+                height: '85%',
+                objectFit: 'contain',
+                transform: 'translate(-50%, -50%)',
+              }}
+              draggable="false"
+            />
+
+             {/* 새 인간 */}
+             <img 
+              src="/New studio/새 인간.png"
+              alt="새 인간"
+              style={{
+                ...imageStyles,
+                zIndex: 10,
+                left: '30%',
+                top: '70%',
+                width: 'auto',
+                height: '55%',
+                objectFit: 'contain',
+                transform: 'translate(-50%, -50%)',
+              }}
+              draggable="false"
+            />
+
+            {/* 새 인간2 */}
+            <img 
+              src="/New studio/새 인간.png"
+              alt="새 인간"
+              style={{
+                ...imageStyles,
+                zIndex: 10,
+                left: '47%',
+                top: '43%',
+                width: 'auto',
+                height: '55%',
+                objectFit: 'contain',
+                transform: 'scaleX(-1)',
+              }}
               draggable="false"
             />
           </div>
