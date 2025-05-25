@@ -332,7 +332,7 @@ export default function HomePage() {
             style={{
               ...img.style,
               // 인센스.png와 바야 로고.png를 dimStep에 따라 투명하게 함
-              opacity: ['/New studio/인센스.png', '/New studio/바야 로고.png'].includes(img.src)
+              opacity: ['/New studio/인센스.png', '/New studio/바야 로고.png', '/New studio/이름.png', '/New studio/흉상 옆.png', '/New studio/종 복사본.png'].includes(img.src)
                 ? (dimStep < 0.5 ? 1 : 1 - (dimStep - 0.5) * 2)
                 : 1
             }} 
