@@ -269,14 +269,9 @@ const imagesData = [
 export default function HomePage() {
   const [isDimmed, setIsDimmed] = useState(false);
   const [dimStep, setDimStep] = useState(0);
-  const [animationStage, setAnimationStage] = useState('initial'); // 'initial', 'blurring', 'logoShowing', 'fadingOut', 'finished'
 
   const handleScreenClick = () => {
-    // 애니메이션이 완료된 상태에서는 클릭 무시
-    if (animationStage === 'finished') return;
-    
     setIsDimmed(true);
-    setAnimationStage('blurring');
   };
 
   useEffect(() => {
@@ -287,14 +282,6 @@ export default function HomePage() {
         if (step >= 1) {
           step = 1;
           clearInterval(interval);
-          // 블러 애니메이션이 끝나면 로고 표시 단계로 전환
-          setTimeout(() => {
-            setAnimationStage('logoShowing');
-            // 3초 후 페이드아웃 시작
-            setTimeout(() => {
-              setAnimationStage('fadingOut');
-            }, 3000);
-          }, 500);
         }
         setDimStep(step);
       }, 16);
@@ -303,25 +290,6 @@ export default function HomePage() {
       setDimStep(0);
     }
   }, [isDimmed]);
-
-  // 페이드아웃 애니메이션을 위한 별도 state
-  const [fadeStep, setFadeStep] = useState(0);
-
-  useEffect(() => {
-    if (animationStage === 'fadingOut') {
-      let step = 0;
-      const interval = setInterval(() => {
-        step += 0.02; // 천천히 페이드아웃
-        if (step >= 1) {
-          step = 1;
-          clearInterval(interval);
-          setAnimationStage('finished');
-        }
-        setFadeStep(step);
-      }, 16);
-      return () => clearInterval(interval);
-    }
-  }, [animationStage]);
 
   return (
     <>
@@ -356,71 +324,21 @@ export default function HomePage() {
           cursor: 'pointer',
         }}
       >
-        {imagesData.map((img, index) => {
-          // 기존 바야 로고는 원래대로 유지 (숨기지 않음)
-          let opacity = 1;
-          
-          if (animationStage === 'initial') {
-            opacity = 1;
-          } else if (animationStage === 'blurring') {
-            // 기존 블러링 로직 유지 (일부 요소만 페이드)
-            if (['/New studio/인센스.png', '/New studio/이름.png', '/New studio/흉상 옆.png', '/New studio/종 복사본.png', '/New studio/바야 로고.png'].includes(img.src)) {
-              opacity = dimStep < 0.5 ? 1 : 1 - (dimStep - 0.5) * 2;
-            } else {
-              opacity = 1;
-            }
-          } else if (animationStage === 'logoShowing') {
-            // 로고가 표시되는 동안: 블러로 사라진 요소들은 계속 숨김, 나머지는 유지
-            if (['/New studio/인센스.png', '/New studio/이름.png', '/New studio/흉상 옆.png', '/New studio/종 복사본.png', '/New studio/바야 로고.png'].includes(img.src)) {
-              opacity = 0; // 이미 사라진 상태 유지
-            } else {
-              opacity = 1; // 배경과 기존 바야 로고 등은 계속 보임
-            }
-          } else if (animationStage === 'fadingOut') {
-            // 블러에서 이미 사라진 요소들은 계속 숨김, 나머지만 페이드아웃
-            if (['/New studio/인센스.png', '/New studio/이름.png', '/New studio/흉상 옆.png', '/New studio/종 복사본.png', '/New studio/바야 로고.png'].includes(img.src)) {
-              opacity = 0; // 계속 숨김 상태 유지
-            } else {
-              opacity = 1 - fadeStep; // 나머지 요소들만 페이드아웃
-            }
-          } else if (animationStage === 'finished') {
-            opacity = 0;
-          }
-
-          return (
-            <img 
-              key={index}
-              src={img.src}
-              alt={img.alt}
-              style={{
-                ...img.style,
-                opacity: opacity
-              }} 
-              draggable="false"
-            />
-          );
-        })}
-        
-        {/* 새로운 큰 바야 로고 */}
-        <img 
-          src="/New studio/바야 로고 큰 버전.png"
-          alt="큰 바야 로고"
-          style={{
-            position: 'absolute',
-            zIndex: 25,
-            left: '50%',
-            top: '50%',
-            height: '20.7%',
-            width: 'auto',
-            transform: 'translate(-50%, -50%)',
-            opacity: animationStage === 'logoShowing' ? 1 : 
-                    animationStage === 'fadingOut' ? 1 - fadeStep : 0,
-            transition: animationStage === 'logoShowing' ? 'opacity 0.5s ease-in-out' : 'none',
-            userSelect: 'none',
-            WebkitUserDrag: 'none',
-          }} 
-          draggable="false"
-        />
+        {imagesData.map((img, index) => (
+          <img 
+            key={index}
+            src={img.src}
+            alt={img.alt}
+            style={{
+              ...img.style,
+              // 인센스.png와 바야 로고.png를 dimStep에 따라 투명하게 함
+              opacity: ['/New studio/인센스.png', '/New studio/바야 로고.png', '/New studio/이름.png', '/New studio/흉상 옆.png', '/New studio/종 복사본.png'].includes(img.src)
+                ? (dimStep < 0.5 ? 1 : 1 - (dimStep - 0.5) * 2)
+                : 1
+            }} 
+            draggable="false"
+          />
+        ))}
         <div 
           style={{
             position: 'absolute',
@@ -438,27 +356,10 @@ export default function HomePage() {
               rgba(0,0,0,0.95) ${100 * (1 - dimStep) + 25}%,
               rgba(0,0,0,1) ${100 * (1 - dimStep) + 30}%
             )`,
-            opacity: (animationStage === 'blurring' || animationStage === 'logoShowing') ? 1 : 
-                    animationStage === 'fadingOut' ? 1 - fadeStep : 0,
+            opacity: isDimmed ? 1 : 0,
             transition: 'opacity 0.3s ease-in-out',
-            pointerEvents: (animationStage === 'blurring' || animationStage === 'logoShowing') ? 'auto' : 'none',
+            pointerEvents: isDimmed ? 'auto' : 'none',
             zIndex: 10,
-          }}
-        />
-        
-        {/* 최종 검은 화면 */}
-        <div 
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            background: '#000',
-            opacity: animationStage === 'finished' ? 1 : 0,
-            transition: 'opacity 0.5s ease-in-out',
-            pointerEvents: animationStage === 'finished' ? 'auto' : 'none',
-            zIndex: 20,
           }}
         />
       </main>
