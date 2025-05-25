@@ -269,11 +269,11 @@ const imagesData = [
 export default function HomePage() {
   const [isDimmed, setIsDimmed] = useState(false);
   const [dimStep, setDimStep] = useState(0);
-  const [animationStage, setAnimationStage] = useState('initial'); // 'initial', 'blurring', 'logoShowing', 'fadingOut', 'finished', 'showingIntro', 'introFadingOut', 'introFinished', 'nextScreen'
+  const [animationStage, setAnimationStage] = useState('initial'); // 'initial', 'blurring', 'logoShowing', 'fadingOut', 'finished', 'showingIntro', 'introFadingOut', 'introFinished'
 
   const handleScreenClick = () => {
     // 애니메이션이 완료된 상태나 소개글 단계에서는 클릭 무시
-    if (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut' || animationStage === 'introFinished' || animationStage === 'nextScreen') return;
+    if (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut' || animationStage === 'introFinished') return;
     
     setIsDimmed(true);
     setAnimationStage('blurring');
@@ -365,16 +365,6 @@ export default function HomePage() {
         setIntroOpacity(opacity);
       }, 16);
       return () => clearInterval(interval);
-    }
-  }, [animationStage]);
-
-  // 소개글 완료 후 다음 화면으로 전환
-  useEffect(() => {
-    if (animationStage === 'introFinished') {
-      const timer = setTimeout(() => {
-        setAnimationStage('nextScreen');
-      }, 1000);
-      return () => clearTimeout(timer);
     }
   }, [animationStage]);
 
@@ -529,43 +519,12 @@ export default function HomePage() {
             width: '100%',
             height: '100%',
             background: '#000',
-            opacity: (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut' || animationStage === 'introFinished') ? 1 : 0,
+            opacity: (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut') ? 1 : 0,
             transition: 'opacity 0.5s ease-in-out',
-            pointerEvents: (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut' || animationStage === 'introFinished') ? 'auto' : 'none',
+            pointerEvents: (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut') ? 'auto' : 'none',
             zIndex: 20,
           }}
         />
-        
-        {/* 다음 화면 */}
-        {animationStage === 'nextScreen' && (
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            zIndex: 50,
-            background: '#000',
-          }}>
-            {/* 다음 화면의 배경 - 첫 화면과 동일한 크기, 위치 */}
-            <img 
-              src="/New studio/배경.png"
-              alt="다음 화면 배경"
-              style={{
-                position: 'absolute',
-                zIndex: 0,
-                left: '0%',
-                top: '0%',
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                userSelect: 'none',
-                WebkitUserDrag: 'none',
-              }} 
-              draggable="false"
-            />
-          </div>
-        )}
       </main>
     </>
   );
