@@ -272,8 +272,8 @@ export default function HomePage() {
   const [animationStage, setAnimationStage] = useState('initial'); // 'initial', 'blurring', 'logoShowing', 'fadingOut', 'finished', 'showingIntro', 'introFadingOut', 'introFinished', 'nextScreen'
 
   const handleScreenClick = () => {
-    // 애니메이션이 완료된 상태나 소개글 단계에서는 클릭 무시 (nextScreen은 제외)
-    if (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut' || animationStage === 'introFinished') return;
+    // 애니메이션이 완료된 상태나 소개글 단계, 그리고 다음 화면에서는 클릭 무시
+    if (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut' || animationStage === 'introFinished' || animationStage === 'nextScreen') return;
     
     setIsDimmed(true);
     setAnimationStage('blurring');
