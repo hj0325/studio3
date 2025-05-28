@@ -1,16 +1,16 @@
 import Head from "next/head";
 // import Image from "next/image"; // 현재 직접 img 태그를 사용하므로 Next/Image는 주석 처리
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Roboto_Mono } from "next/font/google";
 // import styles from "@/styles/Home.module.css"; // 기본 스타일 시트 사용 안 함
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const robotoMono = Roboto_Mono({
+  variable: "--font-roboto-mono",
   subsets: ["latin"],
 });
 
@@ -270,23 +270,78 @@ export default function HomePage() {
   const [isDimmed, setIsDimmed] = useState(false);
   const [dimStep, setDimStep] = useState(0);
   const [animationStage, setAnimationStage] = useState('initial'); // 'initial', 'blurring', 'logoShowing', 'fadingOut', 'finished', 'showingIntro', 'introFadingOut', 'introFinished', 'nextScreen'
+  const [nextScreen, setNextScreen] = useState(false);
+  const [nextScreenOpacity, setNextScreenOpacity] = useState(0);
 
-  const handleScreenClick = () => {
-    // 애니메이션이 완료된 상태나 소개글 단계, 그리고 다음 화면에서는 클릭 무시
-    if (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut' || animationStage === 'introFinished' || animationStage === 'nextScreen') return;
+  const handleScreenClick = useCallback(() => {
+    // 다음 화면에서는 클릭 시 첫 번째 화면으로 돌아감
+    if (nextScreen) {
+      setNextScreen(false);
+      setAnimationStage('initial');
+      setIsDimmed(false);
+      setDimStep(0);
+      setNextScreenOpacity(0);
+      return;
+    }
+
+    // 애니메이션이 완료된 상태나 소개글 단계에서는 클릭 무시
+    if (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut' || animationStage === 'introFinished') return;
     
     setIsDimmed(true);
     setAnimationStage('blurring');
-  };
+  }, [animationStage, nextScreen]);
 
-  // 첫화면으로 돌아가는 함수
-  const resetToFirstScreen = () => {
-    setIsDimmed(false);
-    setDimStep(0);
-    setFadeStep(0);
-    setIntroOpacity(0);
-    setAnimationStage('initial');
-  };
+  // WebSocket 연결을 위한 useEffect 추가
+  useEffect(() => {
+    let ws = null;
+
+    const connectWebSocket = () => {
+      try {
+        ws = new WebSocket('ws://localhost:8080');
+
+        ws.onopen = () => {
+          console.log('WebSocket 연결 성공');
+        };
+
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log('WebSocket 메시지 수신:', data);
+
+            // Arduino 신호를 받으면 화면 클릭과 동일한 동작 실행
+            if (data.type === 'arduino_signal' && data.message === 'ON') {
+              console.log('Arduino 신호 감지! 화면 클릭 이벤트 실행');
+              handleScreenClick();
+            }
+          } catch (error) {
+            console.error('WebSocket 메시지 파싱 오류:', error);
+          }
+        };
+
+        ws.onclose = () => {
+          console.log('WebSocket 연결 해제. 3초 후 재연결 시도...');
+          setTimeout(connectWebSocket, 3000);
+        };
+
+        ws.onerror = (error) => {
+          console.error('WebSocket 오류:', error);
+        };
+      } catch (error) {
+        console.error('WebSocket 연결 실패:', error);
+        setTimeout(connectWebSocket, 3000);
+      }
+    };
+
+    // 컴포넌트 마운트 시 WebSocket 연결
+    connectWebSocket();
+
+    // 컴포넌트 언마운트 시 WebSocket 연결 해제
+    return () => {
+      if (ws) {
+        ws.close();
+      }
+    };
+  }, [handleScreenClick]);
 
   useEffect(() => {
     if (isDimmed) {
@@ -381,32 +436,30 @@ export default function HomePage() {
   useEffect(() => {
     if (animationStage === 'introFinished') {
       const timer = setTimeout(() => {
-        setAnimationStage('nextScreen');
+        setNextScreen(true);
       }, 1000);
       return () => clearTimeout(timer);
     }
   }, [animationStage]);
 
-  // 다음 화면 이미지들의 동시 등장을 위한 opacity state
-  const [nextScreenOpacity, setNextScreenOpacity] = useState(0);
-
-  // 다음 화면 등장 애니메이션
+  // 다음 화면 페이드인 애니메이션
   useEffect(() => {
-    if (animationStage === 'nextScreen') {
-      let opacity = 0;
+    if (nextScreen) {
+      let opacityValue = 0;
       const interval = setInterval(() => {
-        opacity += 0.05; // 빠르게 나타남
-        if (opacity >= 1) {
-          opacity = 1;
+        opacityValue += 0.05;
+        if (opacityValue >= 1) {
+          opacityValue = 1;
           clearInterval(interval);
         }
-        setNextScreenOpacity(opacity);
+        setNextScreenOpacity(opacityValue);
       }, 16);
+
       return () => clearInterval(interval);
     } else {
       setNextScreenOpacity(0);
     }
-  }, [animationStage]);
+  }, [nextScreen]);
 
   return (
     <>
@@ -419,7 +472,7 @@ export default function HomePage() {
             padding: 0;
             margin: 0;
             overflow: hidden;
-            font-family: ${geistSans.style.fontFamily}, ${geistMono.style.fontFamily}, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+            font-family: ${inter.style.fontFamily}, ${robotoMono.style.fontFamily}, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
             background: #000;
           }
           * {
@@ -430,7 +483,7 @@ export default function HomePage() {
       <main 
         onClick={handleScreenClick}
         style={{
-          fontFamily: `var(--font-geist-sans), var(--font-geist-mono)`,
+          fontFamily: `var(--font-inter), var(--font-roboto-mono)`,
           position: 'relative',
           width: '100vw',
           height: '100vh',
@@ -441,146 +494,143 @@ export default function HomePage() {
           cursor: 'pointer',
         }}
       >
-        {imagesData.map((img, index) => {
-          // 기존 바야 로고는 원래대로 유지 (숨기지 않음)
-          let opacity = 1;
-          
-          if (animationStage === 'initial') {
-            opacity = 1;
-          } else if (animationStage === 'blurring') {
-            // 기존 블러링 로직 유지 (일부 요소만 페이드)
-            if (['/New studio/인센스.png', '/New studio/이름.png', '/New studio/흉상 옆.png', '/New studio/종 복사본.png', '/New studio/바야 로고.png'].includes(img.src)) {
-              opacity = dimStep < 0.5 ? 1 : 1 - (dimStep - 0.5) * 2;
-            } else {
-              opacity = 1;
-            }
-          } else if (animationStage === 'logoShowing') {
-            // 로고가 표시되는 동안: 블러로 사라진 요소들은 계속 숨김, 나머지는 유지
-            if (['/New studio/인센스.png', '/New studio/이름.png', '/New studio/흉상 옆.png', '/New studio/종 복사본.png', '/New studio/바야 로고.png'].includes(img.src)) {
-              opacity = 0; // 이미 사라진 상태 유지
-            } else {
-              opacity = 1; // 배경과 기존 바야 로고 등은 계속 보임
-            }
-          } else if (animationStage === 'fadingOut') {
-            // 블러에서 이미 사라진 요소들은 계속 숨김, 나머지만 페이드아웃
-            if (['/New studio/인센스.png', '/New studio/이름.png', '/New studio/흉상 옆.png', '/New studio/종 복사본.png', '/New studio/바야 로고.png'].includes(img.src)) {
-              opacity = 0; // 계속 숨김 상태 유지
-            } else {
-              opacity = 1 - fadeStep; // 나머지 요소들만 페이드아웃
-            }
-          } else if (animationStage === 'finished') {
-            opacity = 0;
-          }
+        {/* 첫 번째 화면 */}
+        {!nextScreen && (
+          <>
+            {imagesData.map((img, index) => {
+              // 기존 바야 로고는 원래대로 유지 (숨기지 않음)
+              let opacity = 1;
+              
+              if (animationStage === 'initial') {
+                opacity = 1;
+              } else if (animationStage === 'blurring') {
+                // 기존 블러링 로직 유지 (일부 요소만 페이드)
+                if (['/New studio/인센스.png', '/New studio/이름.png', '/New studio/흉상 옆.png', '/New studio/종 복사본.png', '/New studio/바야 로고.png'].includes(img.src)) {
+                  opacity = dimStep < 0.5 ? 1 : 1 - (dimStep - 0.5) * 2;
+                } else {
+                  opacity = 1;
+                }
+              } else if (animationStage === 'logoShowing') {
+                // 로고가 표시되는 동안: 블러로 사라진 요소들은 계속 숨김, 나머지는 유지
+                if (['/New studio/인센스.png', '/New studio/이름.png', '/New studio/흉상 옆.png', '/New studio/종 복사본.png', '/New studio/바야 로고.png'].includes(img.src)) {
+                  opacity = 0; // 이미 사라진 상태 유지
+                } else {
+                  opacity = 1; // 배경과 기존 바야 로고 등은 계속 보임
+                }
+              } else if (animationStage === 'fadingOut') {
+                // 블러에서 이미 사라진 요소들은 계속 숨김, 나머지만 페이드아웃
+                if (['/New studio/인센스.png', '/New studio/이름.png', '/New studio/흉상 옆.png', '/New studio/종 복사본.png', '/New studio/바야 로고.png'].includes(img.src)) {
+                  opacity = 0; // 계속 숨김 상태 유지
+                } else {
+                  opacity = 1 - fadeStep; // 나머지 요소들만 페이드아웃
+                }
+              } else if (animationStage === 'finished') {
+                opacity = 0;
+              }
 
-          return (
+              return (
+                <img 
+                  key={index}
+                  src={img.src}
+                  alt={img.alt}
+                  style={{
+                    ...img.style,
+                    opacity: opacity
+                  }} 
+                  draggable="false"
+                />
+              );
+            })}
+            
+            {/* 새로운 큰 바야 로고 */}
             <img 
-              key={index}
-              src={img.src}
-              alt={img.alt}
+              src="/New studio/바야 로고 큰 버전.png"
+              alt="큰 바야 로고"
               style={{
-                ...img.style,
-                opacity: opacity
+                position: 'absolute',
+                zIndex: 25,
+                left: '50%',
+                top: '50%',
+                height: '20%',
+                width: 'auto',
+                transform: 'translate(-50%, -50%)',
+                opacity: animationStage === 'logoShowing' ? 1 : 
+                        animationStage === 'fadingOut' ? 1 - fadeStep : 0,
+                transition: animationStage === 'logoShowing' ? 'opacity 0.5s ease-in-out' : 'none',
+                userSelect: 'none',
+                WebkitUserDrag: 'none',
               }} 
               draggable="false"
             />
-          );
-        })}
-        
-        {/* 새로운 큰 바야 로고 */}
-        <img 
-          src="/New studio/바야 로고 큰 버전.png"
-          alt="큰 바야 로고"
-          style={{
-            position: 'absolute',
-            zIndex: 25,
-            left: '50%',
-            top: '50%',
-            height: '20%',
-            width: 'auto',
-            transform: 'translate(-50%, -50%)',
-            opacity: animationStage === 'logoShowing' ? 1 : 
-                    animationStage === 'fadingOut' ? 1 - fadeStep : 0,
-            transition: animationStage === 'logoShowing' ? 'opacity 0.5s ease-in-out' : 'none',
-            userSelect: 'none',
-            WebkitUserDrag: 'none',
-          }} 
-          draggable="false"
-        />
-        
-        {/* 소개글 */}
-        <img 
-          src="/New studio/소개글.png"
-          alt="소개글"
-          style={{
-            position: 'absolute',
-            zIndex: 30,
-            left: '50%',
-            top: '50%',
-            height: '20.5%',
-            width: 'auto',
-            transform: 'translate(-50%, -50%)',
-            opacity: introOpacity,
-            userSelect: 'none',
-            WebkitUserDrag: 'none',
-          }} 
-          draggable="false"
-        />
-        <div 
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            background: `radial-gradient(
-              circle,
-              rgba(0,0,0,0) ${100 * (1 - dimStep)}%,
-              rgba(0,0,0,0.1) ${100 * (1 - dimStep) + 5}%,
-              rgba(0,0,0,0.3) ${100 * (1 - dimStep) + 10}%,
-              rgba(0,0,0,0.6) ${100 * (1 - dimStep) + 15}%,
-              rgba(0,0,0,0.8) ${100 * (1 - dimStep) + 20}%,
-              rgba(0,0,0,0.95) ${100 * (1 - dimStep) + 25}%,
-              rgba(0,0,0,1) ${100 * (1 - dimStep) + 30}%
-            )`,
-            opacity: (animationStage === 'blurring' || animationStage === 'logoShowing') ? 1 : 
-                    animationStage === 'fadingOut' ? 1 - fadeStep : 0,
-            transition: 'opacity 0.3s ease-in-out',
-            pointerEvents: (animationStage === 'blurring' || animationStage === 'logoShowing') ? 'auto' : 'none',
-            zIndex: 10,
-          }}
-        />
-        
-        {/* 최종 검은 화면 */}
-        <div 
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            background: '#000',
-            opacity: (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut' || animationStage === 'introFinished') ? 1 : 0,
-            transition: 'opacity 0.5s ease-in-out',
-            pointerEvents: (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut' || animationStage === 'introFinished') ? 'auto' : 'none',
-            zIndex: 20,
-          }}
-        />
-        
-        {/* 다음 화면 */}
-        {animationStage === 'nextScreen' && (
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            zIndex: 50,
-            background: '#000',
-          }}>
-            {/* 다음 화면의 배경 - 첫 화면과 동일한 크기, 위치 */}
+            
+            {/* 소개글 */}
+            <img 
+              src="/New studio/소개글.png"
+              alt="소개글"
+              style={{
+                position: 'absolute',
+                zIndex: 30,
+                left: '50%',
+                top: '50%',
+                height: '20.5%',
+                width: 'auto',
+                transform: 'translate(-50%, -50%)',
+                opacity: introOpacity,
+                userSelect: 'none',
+                WebkitUserDrag: 'none',
+              }} 
+              draggable="false"
+            />
+            <div 
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                background: `radial-gradient(
+                  circle,
+                  rgba(0,0,0,0) ${100 * (1 - dimStep)}%,
+                  rgba(0,0,0,0.1) ${100 * (1 - dimStep) + 5}%,
+                  rgba(0,0,0,0.3) ${100 * (1 - dimStep) + 10}%,
+                  rgba(0,0,0,0.6) ${100 * (1 - dimStep) + 15}%,
+                  rgba(0,0,0,0.8) ${100 * (1 - dimStep) + 20}%,
+                  rgba(0,0,0,0.95) ${100 * (1 - dimStep) + 25}%,
+                  rgba(0,0,0,1) ${100 * (1 - dimStep) + 30}%
+                )`,
+                opacity: (animationStage === 'blurring' || animationStage === 'logoShowing') ? 1 : 
+                        animationStage === 'fadingOut' ? 1 - fadeStep : 0,
+                transition: 'opacity 0.3s ease-in-out',
+                pointerEvents: (animationStage === 'blurring' || animationStage === 'logoShowing') ? 'auto' : 'none',
+                zIndex: 10,
+              }}
+            />
+            
+            {/* 최종 검은 화면 */}
+            <div 
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                background: '#000',
+                opacity: (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut' || animationStage === 'introFinished') ? 1 : 0,
+                transition: 'opacity 0.5s ease-in-out',
+                pointerEvents: (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut' || animationStage === 'introFinished') ? 'auto' : 'none',
+                zIndex: 20,
+              }}
+            />
+          </>
+        )}
+
+        {/* 두 번째 화면 */}
+        {nextScreen && (
+          <>
+            {/* 배경 */}
             <img 
               src="/New studio/배경.png"
-              alt="다음 화면 배경"
+              alt="배경"
               style={{
                 position: 'absolute',
                 zIndex: 0,
@@ -614,8 +664,8 @@ export default function HomePage() {
               draggable="false"
             />
 
-             {/* 종 */}
-             <img 
+            {/* 종 */}
+            <img 
               src="/New studio/종.png"
               alt="종"
               style={{
@@ -632,8 +682,8 @@ export default function HomePage() {
               draggable="false"
             />
 
-             {/* 새 인간 */}
-             <img 
+            {/* 새 인간 */}
+            <img 
               src="/New studio/새 인간.png"
               alt="새 인간"
               style={{
@@ -650,7 +700,7 @@ export default function HomePage() {
               draggable="false"
             />
 
-             {/* 새 인간2 */}
+            {/* 새 인간2 */}
             <img 
               src="/New studio/새 인간.png"
               alt="새 인간"
@@ -668,11 +718,10 @@ export default function HomePage() {
               draggable="false"
             />
 
-             {/* 문양 - 첫화면으로 돌아가는 버튼 */}
-             <img 
+            {/* 문양 - 첫 번째 페이지로 돌아가는 버튼 */}
+            <img 
               src="/New studio/문양.png"
               alt="문양"
-              onClick={resetToFirstScreen}
               style={{
                 ...imageStyles,
                 zIndex: 2,
@@ -687,7 +736,7 @@ export default function HomePage() {
               }}
               draggable="false"
             />
-          </div>
+          </>
         )}
       </main>
     </>

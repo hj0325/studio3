@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "arduino-server": "nodemon server/arduino-websocket-server.js",
+    "dev:full": "concurrently \"yarn dev\" \"yarn arduino-server\""
   },
   "dependencies": {
     "framer-motion": "^12.12.1",
@@ -15,5 +17,9 @@
     "react-dom": "^19.0.0",
     "serialport": "^13.0.0",
     "ws": "^8.18.2"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "nodemon": "^3.1.10"
   }
 }
