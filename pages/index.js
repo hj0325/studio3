@@ -2,7 +2,14 @@ import Head from "next/head";
 // import Image from "next/image"; // 현재 직접 img 태그를 사용하므로 Next/Image는 주석 처리
 import { Inter, Roboto_Mono } from "next/font/google";
 // import styles from "@/styles/Home.module.css"; // 기본 스타일 시트 사용 안 함
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import dynamic from 'next/dynamic';
+
+// Three.js 컴포넌트를 dynamic import로 클라이언트 사이드에서만 로드
+const SmokeCanvas = dynamic(() => import('../components/SmokeCanvas'), {
+  ssr: false,
+  loading: () => null
+});
 
 const inter = Inter({
   variable: "--font-inter",
@@ -280,6 +287,8 @@ export default function HomePage() {
       setAnimationStage('initial');
       setIsDimmed(false);
       setDimStep(0);
+      setFadeStep(0);
+      setIntroOpacity(0);
       setNextScreenOpacity(0);
       return;
     }
@@ -542,6 +551,22 @@ export default function HomePage() {
               );
             })}
             
+            {/* 연기 효과 Canvas */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+              zIndex: 6, // 인센스 위에, 하지만 다른 요소들 아래
+              opacity: animationStage === 'initial' ? 1 : 
+                      (animationStage === 'blurring' || animationStage === 'logoShowing') ? 0.3 :
+                      animationStage === 'fadingOut' ? 0.3 * (1 - fadeStep) : 0
+            }}>
+              <SmokeCanvas />
+            </div>
+            
             {/* 새로운 큰 바야 로고 */}
             <img 
               src="/New studio/바야 로고 큰 버전.png"
@@ -736,6 +761,20 @@ export default function HomePage() {
               }}
               draggable="false"
             />
+            
+            {/* 두 번째 화면 연기 효과 */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+              zIndex: 1,
+              opacity: nextScreenOpacity * 0.8
+            }}>
+              <SmokeCanvas />
+            </div>
           </>
         )}
       </main>

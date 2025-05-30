@@ -11,11 +11,14 @@
     "dev:full": "concurrently \"yarn dev\" \"yarn arduino-server\""
   },
   "dependencies": {
+    "@react-three/drei": "^10.1.2",
+    "@react-three/fiber": "^9.1.2",
     "framer-motion": "^12.12.1",
     "next": "15.3.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "serialport": "^13.0.0",
+    "three": "^0.176.0",
     "ws": "^8.18.2"
   },
   "devDependencies": {
