@@ -11,6 +11,8 @@
     "dev:full": "concurrently \"yarn dev\" \"yarn arduino-server\""
   },
   "dependencies": {
+    "@google/genai": "^1.3.0",
+    "@google/generative-ai": "^0.24.1",
     "@react-three/drei": "^10.1.2",
     "@react-three/fiber": "^9.1.2",
     "framer-motion": "^12.12.1",

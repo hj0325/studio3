@@ -3,6 +3,7 @@ import Head from "next/head";
 import { Geist, Geist_Mono } from "next/font/google";
 // import styles from "@/styles/Home.module.css"; // 기본 스타일 시트 사용 안 함
 import React, { useState, useEffect } from 'react';
+import VayaVoiceChat from '../components/VayaVoiceChat';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -270,6 +271,7 @@ export default function HomePage() {
   const [isDimmed, setIsDimmed] = useState(false);
   const [dimStep, setDimStep] = useState(0);
   const [animationStage, setAnimationStage] = useState('initial'); // 'initial', 'blurring', 'logoShowing', 'fadingOut', 'finished', 'showingIntro', 'introFadingOut', 'introFinished'
+  const [isVayaActive, setIsVayaActive] = useState(false);
 
   const handleScreenClick = () => {
     // 애니메이션이 완료된 상태나 소개글 단계에서는 클릭 무시
@@ -367,6 +369,21 @@ export default function HomePage() {
       return () => clearInterval(interval);
     }
   }, [animationStage]);
+
+  // 소개글이 끝나면 VAYA 대화 시작
+  useEffect(() => {
+    if (animationStage === 'introFinished') {
+      setTimeout(() => {
+        setIsVayaActive(true);
+      }, 1000); // 1초 후 VAYA 시작
+    }
+  }, [animationStage]);
+
+  // VAYA 대화 완료 핸들러
+  const handleVayaComplete = () => {
+    setIsVayaActive(false);
+    // 대화 완료 후 추가 로직이 필요하면 여기에 추가
+  };
 
   return (
     <>
@@ -519,11 +536,17 @@ export default function HomePage() {
             width: '100%',
             height: '100%',
             background: '#000',
-            opacity: (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut') ? 1 : 0,
+            opacity: (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut' || animationStage === 'introFinished') ? 1 : 0,
             transition: 'opacity 0.5s ease-in-out',
-            pointerEvents: (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut') ? 'auto' : 'none',
+            pointerEvents: (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut' || animationStage === 'introFinished') ? 'auto' : 'none',
             zIndex: 20,
           }}
+        />
+
+        {/* VAYA 음성 대화 컴포넌트 */}
+        <VayaVoiceChat 
+          isActive={isVayaActive}
+          onComplete={handleVayaComplete}
         />
       </main>
     </>
