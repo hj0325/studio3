@@ -12,6 +12,12 @@ const CircularPoints = dynamic(() => import('../components/CircularPoints'), {
   loading: () => null
 });
 
+// TendrilsEffect - keeffeoghan 스타일의 WebGL 파티클 효과 
+const TendrilsEffect = dynamic(() => import('../components/TendrilsEffect'), {
+  ssr: false,
+  loading: () => null
+});
+
 // SmokeCanvas - 첫 번째 페이지 연기 효과
 const SmokeCanvas = dynamic(() => import('../components/SmokeCanvas'), {
   ssr: false,
@@ -599,7 +605,7 @@ export default function HomePage() {
               <SmokeCanvas />
             </div>
             
-            {/* CircularPoints 원형 파티클 효과 - 최상위 레이어 */}
+            {/* TendrilsEffect - keeffeoghan 스타일 WebGL 파티클 효과 */}
             <div style={{
               position: 'absolute',
               top: 0,
@@ -607,7 +613,20 @@ export default function HomePage() {
               width: '100%',
               height: '100%',
               pointerEvents: 'none',
-              zIndex: 35, // 모든 요소들 위에 표시
+              zIndex: 40, // CircularPoints 위에 표시
+            }}>
+              <TendrilsEffect animationStage={animationStage} />
+            </div>
+            
+            {/* CircularPoints 원형 파티클 효과 - 최상위 레이어에서 두 번째 */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+              zIndex: 35, // TendrilsEffect 아래에 표시
               opacity: animationStage === 'initial' ? 1 : 
                       (animationStage === 'blurring' || animationStage === 'logoShowing') ? 0.3 :
                       animationStage === 'fadingOut' ? 0.3 * (1 - fadeStep) : 0
