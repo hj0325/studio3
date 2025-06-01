@@ -14,7 +14,7 @@ const SmokeCanvas = () => {
       return;
     }
 
-    console.log('WebGL initialized successfully'); // 디버깅용
+    console.log('WebGL initialized successfully');
 
     // 캔버스 크기 설정
     const resizeCanvas = () => {
@@ -26,13 +26,14 @@ const SmokeCanvas = () => {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // 간단한 유체 시뮬레이션 설정
+    // 원본 WebGL-Fluid-Simulation과 유사한 설정
     const config = {
       TEXTURE_DOWNSAMPLE: 1,
-      DENSITY_DISSIPATION: 0.98,
-      VELOCITY_DISSIPATION: 0.99,
-      PRESSURE_ITERATIONS: 5,
-      SPLAT_RADIUS: 0.005
+      DENSITY_DISSIPATION: 0.98, // 원본과 유사하게
+      VELOCITY_DISSIPATION: 0.98, // 원본과 유사하게
+      PRESSURE_ITERATIONS: 20, // 원본과 동일하게
+      SPLAT_RADIUS: 0.25, // 원본과 동일한 크기
+      SPLAT_FORCE: 6000 // 적절한 force
     };
 
     // Vertex Shader (공통)
@@ -134,6 +135,7 @@ const SmokeCanvas = () => {
       }
     `;
 
+    // 원본과 동일한 디스플레이 shader
     const displayShader = `
       precision mediump float;
       uniform sampler2D u_texture;
@@ -142,7 +144,7 @@ const SmokeCanvas = () => {
       void main() {
         vec3 color = texture2D(u_texture, v_texCoord).rgb;
         float alpha = max(color.r, max(color.g, color.b));
-        gl_FragColor = vec4(color, alpha * 0.9);
+        gl_FragColor = vec4(color, alpha);
       }
     `;
 
@@ -209,7 +211,7 @@ const SmokeCanvas = () => {
 
     if (!allProgramsValid) return;
 
-    console.log('All programs created successfully'); // 디버깅용
+    console.log('All programs created successfully');
 
     // 기본 버퍼 설정
     const positionBuffer = gl.createBuffer();
@@ -221,7 +223,7 @@ const SmokeCanvas = () => {
        1,  1
     ]), gl.STATIC_DRAW);
 
-    // 텍스처 생성 함수 (기본 RGBA 사용)
+    // 텍스처 생성 함수
     const createTexture = (width, height) => {
       const texture = gl.createTexture();
       gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -240,7 +242,6 @@ const SmokeCanvas = () => {
       gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
       gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
       
-      // FBO 상태 확인
       const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
       if (status !== gl.FRAMEBUFFER_COMPLETE) {
         console.error('Framebuffer not complete:', status);
@@ -262,10 +263,10 @@ const SmokeCanvas = () => {
     };
 
     // FBO들 초기화
-    const simRes = Math.min(canvas.width, canvas.height) >> config.TEXTURE_DOWNSAMPLE;
-    const dyeRes = Math.min(canvas.width, canvas.height) >> (config.TEXTURE_DOWNSAMPLE - 1);
+    const simRes = 128; // 원본과 동일한 해상도
+    const dyeRes = 512;  // 원본과 동일한 해상도
 
-    console.log('Creating FBOs with resolution:', simRes, dyeRes); // 디버깅용
+    console.log('Creating FBOs with resolution:', simRes, dyeRes);
 
     const dye = createDoubleFBO(dyeRes, dyeRes);
     const velocity = createDoubleFBO(simRes, simRes);
@@ -281,36 +282,16 @@ const SmokeCanvas = () => {
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     };
 
-    // HSV to RGB
-    const HSVtoRGB = (h, s, v) => {
-      let r, g, b;
-      const i = Math.floor(h * 6);
-      const f = h * 6 - i;
-      const p = v * (1 - s);
-      const q = v * (1 - f * s);
-      const t = v * (1 - (1 - f) * s);
-      switch (i % 6) {
-        case 0: r = v, g = t, b = p; break;
-        case 1: r = q, g = v, b = p; break;
-        case 2: r = p, g = v, b = t; break;
-        case 3: r = p, g = q, b = v; break;
-        case 4: r = t, g = p, b = v; break;
-        case 5: r = v, g = p, b = q; break;
-        default: r = 0, g = 0, b = 0;
-      }
-      return { r, g, b };
-    };
-
-    const generateColor = () => {
-      const c = HSVtoRGB(Math.random(), 1.0, 1.0);
+    // 하얀색 연기 색상
+    const generateSmokeColor = () => {
       return {
-        r: c.r * 0.5,
-        g: c.g * 0.5,
-        b: c.b * 0.5
+        r: 0.2, // 약간 높여서 더 잘 보이게
+        g: 0.2,
+        b: 0.2
       };
     };
 
-    // Splat 함수
+    // Splat 함수 - 원본과 동일한 방식
     const splat = (x, y, dx, dy, color) => {
       // Velocity splat
       gl.viewport(0, 0, velocity.read.width, velocity.read.height);
@@ -320,8 +301,8 @@ const SmokeCanvas = () => {
       gl.uniform1i(programs.splat.uniforms.u_target, 0);
       gl.uniform1f(programs.splat.uniforms.u_aspectRatio, canvas.width / canvas.height);
       gl.uniform2f(programs.splat.uniforms.u_point, x / canvas.width, 1.0 - y / canvas.height);
-      gl.uniform3f(programs.splat.uniforms.u_color, dx * 0.01, -dy * 0.01, 0.0);
-      gl.uniform1f(programs.splat.uniforms.u_radius, config.SPLAT_RADIUS);
+      gl.uniform3f(programs.splat.uniforms.u_color, dx, -dy, 0.0);
+      gl.uniform1f(programs.splat.uniforms.u_radius, config.SPLAT_RADIUS / 100.0);
       blit(velocity.write.fbo);
       velocity.swap();
 
@@ -331,30 +312,33 @@ const SmokeCanvas = () => {
       gl.bindTexture(gl.TEXTURE_2D, dye.read.texture);
       gl.uniform1i(programs.splat.uniforms.u_target, 0);
       gl.uniform3f(programs.splat.uniforms.u_color, color.r, color.g, color.b);
+      gl.uniform1f(programs.splat.uniforms.u_radius, config.SPLAT_RADIUS / 100.0);
       blit(dye.write.fbo);
       dye.swap();
     };
 
-    // 자동 splat 추가
-    const addAutomaticSplat = () => {
-      const centerX = 0.4 + Math.random() * 0.2;
-      const centerY = 0.4 + Math.random() * 0.2;
+    // 중앙 고정 splat - 웹페이지 정중앙에서 연기 생성
+    const addCenterSplat = () => {
+      // 웹페이지 정중앙 고정 (0.5, 0.5)
+      const centerX = 0.5;
+      const centerY = 0.5;
       
       const x = centerX * canvas.width;
       const y = centerY * canvas.height;
       
+      // 원본처럼 다양한 방향으로 퍼지는 연기
       const angle = Math.random() * Math.PI * 2;
-      const speed = 100 + Math.random() * 200;
+      const speed = 50 + Math.random() * 150;
       const dx = Math.cos(angle) * speed;
       const dy = Math.sin(angle) * speed;
       
-      const color = generateColor();
+      const color = generateSmokeColor();
       splat(x, y, dx, dy, color);
     };
 
-    // 시뮬레이션 스텝
+    // 시뮬레이션 스텝 - 원본과 동일한 순서
     const step = (dt) => {
-      // Advection
+      // Velocity advection
       gl.viewport(0, 0, velocity.read.width, velocity.read.height);
       gl.useProgram(programs.advection.program);
       gl.activeTexture(gl.TEXTURE0);
@@ -391,7 +375,13 @@ const SmokeCanvas = () => {
       gl.uniform2f(programs.divergence.uniforms.u_texelSize, 1.0 / velocity.read.width, 1.0 / velocity.read.height);
       blit(divergence.fbo);
 
-      // Pressure iteration
+      // Clear pressure
+      gl.bindFramebuffer(gl.FRAMEBUFFER, pressure.write.fbo);
+      gl.clearColor(0, 0, 0, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      pressure.swap();
+
+      // Pressure solve
       gl.useProgram(programs.pressure.program);
       gl.activeTexture(gl.TEXTURE1);
       gl.bindTexture(gl.TEXTURE_2D, divergence.texture);
@@ -421,18 +411,15 @@ const SmokeCanvas = () => {
 
     // 렌더링
     const render = () => {
-      // 투명 배경으로 클리어
       gl.clearColor(0.0, 0.0, 0.0, 0.0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       
-      // 메인 화면에 렌더링
       gl.viewport(0, 0, canvas.width, canvas.height);
       gl.useProgram(programs.display.program);
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, dye.read.texture);
       gl.uniform1i(programs.display.uniforms.u_texture, 0);
       
-      // 블렌딩 활성화
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
       
@@ -450,12 +437,12 @@ const SmokeCanvas = () => {
       animationIdRef.current = requestAnimationFrame(update);
     };
 
-    // 자동 splat 간격
+    // 중앙에서 연속적인 연기 생성
     const splatInterval = setInterval(() => {
-      addAutomaticSplat();
-    }, 100); // 100ms마다
+      addCenterSplat();
+    }, 60); // 더 자주 생성해서 연속적인 연기
 
-    console.log('Starting fluid simulation...'); // 디버깅용
+    console.log('Starting centered smoke simulation...');
     
     // 시작
     update();
