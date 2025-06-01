@@ -211,7 +211,7 @@
 
 "@react-three/drei@^10.1.2":
   version "10.1.2"
-  resolved "https://registry.npmjs.org/@react-three/drei/-/drei-10.1.2.tgz"
+  resolved "https://registry.yarnpkg.com/@react-three/drei/-/drei-10.1.2.tgz#3c41a0b19460aee7604067309cebe737147cf85a"
   integrity sha512-CCcLAqZEvYiUErOcJgGzovY3RH6KgdrqD4ubeAx1nyGbSPLnKR9a8ynYbPdtZhIyiWqGc07z+RYQzpaOfN4ZIA==
   dependencies:
     "@babel/runtime" "^7.26.0"

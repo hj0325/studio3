@@ -36,6 +36,24 @@ const SmokeCanvasSecond = dynamic(() => import('../components/SmokeCanvasSecond'
   loading: () => null
 });
 
+// CodeSandboxParticles - 새로운 파티클 효과 (두 번째 페이지용)
+const CodeSandboxParticles = dynamic(() => import('../components/CodeSandboxParticles'), {
+  ssr: false,
+  loading: () => null
+});
+
+// UserInputBar - 하단 사용자 입력창
+const UserInputBar = dynamic(() => import('../components/UserInputBar'), {
+  ssr: false,
+  loading: () => null
+});
+
+// StoneTextOverlay - 비석 텍스트 오버레이
+const StoneTextOverlay = dynamic(() => import('../components/StoneTextOverlay'), {
+  ssr: false,
+  loading: () => null
+});
+
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -784,7 +802,7 @@ export default function HomePage() {
               alt="비석"
               style={{
                 ...imageStyles,
-                zIndex: 1,
+                zIndex: 6,
                 left: '49.5%',
                 top: '50%',
                 width: 'auto',
@@ -802,7 +820,7 @@ export default function HomePage() {
               alt="새 인간"
               style={{
                 ...imageStyles,
-                zIndex: 1,
+                zIndex: 6,
                 left: '30%',
                 top: '70%',
                 width: 'auto',
@@ -820,7 +838,7 @@ export default function HomePage() {
               alt="새 인간"
               style={{
                 ...imageStyles,
-                zIndex: 1,
+                zIndex: 6,
                 left: '47%',
                 top: '43%',
                 width: 'auto',
@@ -933,7 +951,21 @@ export default function HomePage() {
               opacity: nextScreenOpacity // 전체 투명도와 동일하게
             }}>
               <SmokeCanvasSecond />
-          </div>
+            </div>
+
+            {/* CodeSandbox 스타일 파티클 효과 - 기존 요소를 가리지 않는 버전 */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+              zIndex: 3, // 낮은 z-index로 배경 효과
+              opacity: nextScreenOpacity * 0.8 // 약간 투명하게
+            }}>
+              <CodeSandboxParticles />
+            </div>
           </>
         )}
 
