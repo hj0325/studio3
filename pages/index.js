@@ -6,12 +6,19 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import VayaVoiceChat from '../components/VayaVoiceChat';
 
-// Three.js 컴포넌트를 dynamic import로 클라이언트 사이드에서만 로드
+// CircularPoints 컴포넌트를 dynamic import로 클라이언트 사이드에서만 로드 (첫 번째 페이지용)
+const CircularPoints = dynamic(() => import('../components/CircularPoints'), {
+  ssr: false,
+  loading: () => null
+});
+
+// SmokeCanvas - 첫 번째 페이지 연기 효과
 const SmokeCanvas = dynamic(() => import('../components/SmokeCanvas'), {
   ssr: false,
   loading: () => null
 });
 
+// SmokeCanvasSecond는 두 번째 페이지용으로 그대로 유지
 const SmokeCanvasSecond = dynamic(() => import('../components/SmokeCanvasSecond'), {
   ssr: false,
   loading: () => null
@@ -576,7 +583,7 @@ export default function HomePage() {
           );
         })}
             
-            {/* 연기 효과 Canvas */}
+            {/* SmokeCanvas 연기 효과 - 인센스에서 나오는 연기 */}
             <div style={{
               position: 'absolute',
               top: 0,
@@ -584,12 +591,28 @@ export default function HomePage() {
               width: '100%',
               height: '100%',
               pointerEvents: 'none',
-              zIndex: 6, // 인센스 위에, 하지만 다른 요소들 아래
+              zIndex: 6, // 인센스 위에, 하지만 CircularPoints 아래
               opacity: animationStage === 'initial' ? 1 : 
                       (animationStage === 'blurring' || animationStage === 'logoShowing') ? 0.3 :
                       animationStage === 'fadingOut' ? 0.3 * (1 - fadeStep) : 0
             }}>
               <SmokeCanvas />
+            </div>
+            
+            {/* CircularPoints 원형 파티클 효과 - 최상위 레이어 */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+              zIndex: 35, // 모든 요소들 위에 표시
+              opacity: animationStage === 'initial' ? 1 : 
+                      (animationStage === 'blurring' || animationStage === 'logoShowing') ? 0.3 :
+                      animationStage === 'fadingOut' ? 0.3 * (1 - fadeStep) : 0
+            }}>
+              <CircularPoints />
             </div>
         
         {/* 새로운 큰 바야 로고 */}
@@ -787,7 +810,7 @@ export default function HomePage() {
               draggable="false"
             />
             
-            {/* 두 번째 화면 연기 효과 */}
+            {/* 두 번째 화면 파티클 효과 - SmokeCanvasSecond */}
             <div style={{
               position: 'absolute',
               top: 0,
@@ -795,8 +818,8 @@ export default function HomePage() {
               width: '100%',
               height: '100%',
               pointerEvents: 'none',
-              zIndex: 1,
-              opacity: nextScreenOpacity * 0.8
+              zIndex: 5, // z-index 높임
+              opacity: nextScreenOpacity // 전체 투명도와 동일하게
             }}>
               <SmokeCanvasSecond />
           </div>
