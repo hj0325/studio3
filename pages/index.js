@@ -24,6 +24,12 @@ const SmokeCanvas = dynamic(() => import('../components/SmokeCanvas'), {
   loading: () => null
 });
 
+// CircularSmokeParticles - 첫 번째 페이지 원형 회전 파티클 효과
+const CircularSmokeParticles = dynamic(() => import('../components/CircularSmokeParticles'), {
+  ssr: false,
+  loading: () => null
+});
+
 // SmokeCanvasSecond는 두 번째 페이지용으로 그대로 유지
 const SmokeCanvasSecond = dynamic(() => import('../components/SmokeCanvasSecond'), {
   ssr: false,
@@ -632,6 +638,22 @@ export default function HomePage() {
                       animationStage === 'fadingOut' ? 0.3 * (1 - fadeStep) : 0
             }}>
               <CircularPoints />
+            </div>
+            
+            {/* CircularSmokeParticles 원형 회전 파티클 효과 */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+              zIndex: 36, // CircularPoints와 TendrilsEffect 사이에 표시
+              opacity: animationStage === 'initial' ? 1 : 
+                      (animationStage === 'blurring' || animationStage === 'logoShowing') ? 0.4 :
+                      animationStage === 'fadingOut' ? 0.4 * (1 - fadeStep) : 0
+            }}>
+              <CircularSmokeParticles />
             </div>
         
         {/* 새로운 큰 바야 로고 */}

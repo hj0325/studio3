@@ -206,7 +206,7 @@ const SmokeCanvas = () => {
       if (!programs[key]) {
         console.error(`Failed to create program: ${key}`);
         allProgramsValid = false;
-      }
+}
     });
 
     if (!allProgramsValid) return;

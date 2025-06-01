@@ -229,11 +229,11 @@ const CircularPoints = () => {
         gl.uniform2f(translationUniformLocation, centerX + noiseX, centerY + noiseY);
         gl.uniform1f(scaleUniformLocation, 1.0);
         
-        // 회전에 따른 색상 변화 (gold/white gradient)
+        // 회전에 따른 색상 변화 (white gradient)
         const colorPhase = Math.sin(ring.rotation + index) * 0.5 + 0.5;
-        const r = 0.9 + colorPhase * 0.1;
-        const g = 0.8 + colorPhase * 0.2;
-        const b = 0.3 + colorPhase * 0.4;
+        const r = 0.9 + colorPhase * 0.1; // 하얀색 계열
+        const g = 0.9 + colorPhase * 0.1; // 하얀색 계열
+        const b = 0.9 + colorPhase * 0.1; // 하얀색 계열
         
         gl.uniform4f(colorUniformLocation, r, g, b, alpha);
         
@@ -266,11 +266,11 @@ const CircularPoints = () => {
         gl.uniform2f(translationUniformLocation, centerX + noiseX, centerY + noiseY);
         gl.uniform1f(scaleUniformLocation, 1.0);
         
-        // 회전에 따른 색상 변화 (gold/white gradient)
+        // 회전에 따른 색상 변화 (white gradient)
         const colorPhase = Math.sin(ring.rotation + index) * 0.5 + 0.5;
-        const r = 0.9 + colorPhase * 0.1;
-        const g = 0.8 + colorPhase * 0.2;
-        const b = 0.3 + colorPhase * 0.4;
+        const r = 0.9 + colorPhase * 0.1; // 하얀색 계열
+        const g = 0.9 + colorPhase * 0.1; // 하얀색 계열
+        const b = 0.9 + colorPhase * 0.1; // 하얀색 계열
         
         gl.uniform4f(colorUniformLocation, r, g, b, alpha);
         
@@ -303,11 +303,11 @@ const CircularPoints = () => {
         gl.uniform2f(translationUniformLocation, centerX + noiseX, centerY + noiseY);
         gl.uniform1f(scaleUniformLocation, 1.0);
         
-        // 회전에 따른 색상 변화 (gold/white gradient)
+        // 회전에 따른 색상 변화 (white gradient)
         const colorPhase = Math.sin(ring.rotation + index) * 0.5 + 0.5;
-        const r = 0.9 + colorPhase * 0.1;
-        const g = 0.8 + colorPhase * 0.2;
-        const b = 0.3 + colorPhase * 0.4;
+        const r = 0.9 + colorPhase * 0.1; // 하얀색 계열
+        const g = 0.9 + colorPhase * 0.1; // 하얀색 계열
+        const b = 0.9 + colorPhase * 0.1; // 하얀색 계열
         
         gl.uniform4f(colorUniformLocation, r, g, b, alpha);
         
