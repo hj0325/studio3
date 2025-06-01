@@ -12,6 +12,11 @@ const SmokeCanvas = dynamic(() => import('../components/SmokeCanvas'), {
   loading: () => null
 });
 
+const SmokeCanvasSecond = dynamic(() => import('../components/SmokeCanvasSecond'), {
+  ssr: false,
+  loading: () => null
+});
+
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -793,7 +798,7 @@ export default function HomePage() {
               zIndex: 1,
               opacity: nextScreenOpacity * 0.8
             }}>
-              <SmokeCanvas />
+              <SmokeCanvasSecond />
           </div>
           </>
         )}
