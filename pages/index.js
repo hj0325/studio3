@@ -778,17 +778,17 @@ export default function HomePage() {
               draggable="false"
             />
 
-             {/* 종 */}
+             {/* 비석 */}
              <img 
-              src="/New studio/종.png"
-              alt="종"
+              src="/New studio/비석.png"
+              alt="비석"
               style={{
                 ...imageStyles,
                 zIndex: 1,
-                left: '50%',
-                top: '57%',
+                left: '49.5%',
+                top: '50%',
                 width: 'auto',
-                height: '85%',
+                height: '95%',
                 objectFit: 'contain',
                 transform: 'translate(-50%, -50%)',
                 opacity: nextScreenOpacity,
@@ -827,6 +827,76 @@ export default function HomePage() {
                 height: '55%',
                 objectFit: 'contain',
                 transform: 'scaleX(-1)',
+                opacity: nextScreenOpacity,
+              }}
+              draggable="false"
+            />
+
+            {/* 꽃 */}
+            <img 
+              src="/New studio/꽃.png"
+              alt="꽃"
+              style={{
+                ...imageStyles,
+                zIndex: 2,
+                left: '70%',
+                top: '60%',
+                width: 'auto',
+                height: '40%',
+                objectFit: 'contain',
+                transform: 'scaleX(-1)',
+                opacity: nextScreenOpacity,
+              }}
+              draggable="false"
+            />
+
+             {/* 꽃2 */}
+             <img 
+              src="/New studio/꽃.png"
+              alt="꽃"
+              style={{
+                ...imageStyles,
+                zIndex: 2,
+                left: '58%',
+                top: '75%',
+                width: 'auto',
+                height: '30%',
+                objectFit: 'contain',
+                transform: 'scaleX(-1)',
+                opacity: nextScreenOpacity,
+              }}
+              draggable="false"
+            />
+
+            {/* 꽃3 */}
+            <img 
+              src="/New studio/꽃.png"
+              alt="꽃"
+              style={{
+                ...imageStyles,
+                zIndex: 2,
+                left: '-2.4%',
+                top: '60%',
+                width: 'auto',
+                height: '40%',
+                objectFit: 'contain',
+                opacity: nextScreenOpacity,
+              }}
+              draggable="false"
+            />
+
+             {/* 꽃4 */}
+             <img 
+              src="/New studio/꽃.png"
+              alt="꽃"
+              style={{
+                ...imageStyles,
+                zIndex: 2,
+                left: '18%',
+                top: '75%',
+                width: 'auto',
+                height: '30%',
+                objectFit: 'contain',
                 opacity: nextScreenOpacity,
               }}
               draggable="false"
