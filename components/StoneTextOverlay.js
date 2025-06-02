@@ -66,13 +66,21 @@ const StoneTextOverlay = ({
     };
   }, [message, isVisible]);
 
+  // 마침표 뒤 줄바꿈 처리 함수
+  const formatTextWithLineBreaks = (text) => {
+    if (!text) return '';
+    
+    // 마침표 뒤에 공백이 있고 다음 문자가 있으면 줄바꿈 추가
+    return text.replace(/\.\s+/g, '.\n');
+  };
+
   if (!isVisible && !isLoading && !displayedText) return null;
 
   return (
     <div
       style={{
         position: 'absolute',
-        left: '49.5%',
+        left: '50%', // 49.5%에서 50%로 정확히 중앙 정렬
         top: '50%',
         width: '300px',
         height: '400px',
@@ -126,10 +134,11 @@ const StoneTextOverlay = ({
               maxWidth: '100%',
               position: 'relative',
               opacity: fadeOpacity, // 페이드인 효과 적용
-              transition: 'opacity 1.5s ease-in-out' // 부드러운 페이드인 전환
+              transition: 'opacity 1.5s ease-in-out', // 부드러운 페이드인 전환
+              whiteSpace: 'pre-line' // 줄바꿈 문자(\n)를 실제 줄바꿈으로 처리
             }}
           >
-            {displayedText}
+            {formatTextWithLineBreaks(displayedText)}
           </div>
         )}
       </div>
