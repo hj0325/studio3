@@ -8,6 +8,7 @@ const StoneTextOverlay = ({
 }) => {
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [fadeOpacity, setFadeOpacity] = useState(0); // 페이드인 효과를 위한 상태
   const typingIntervalRef = useRef(null);
 
   // 메시지가 바뀔 때마다 타이핑 애니메이션 시작
@@ -15,9 +16,15 @@ const StoneTextOverlay = ({
     if (message && isVisible) {
       setDisplayedText('');
       setIsTyping(true);
+      setFadeOpacity(0); // 페이드인 시작
       
       let currentIndex = 0;
       const typingSpeed = 80; // 밀리초당 글자
+      
+      // 페이드인 효과 시작
+      setTimeout(() => {
+        setFadeOpacity(1);
+      }, 100);
       
       typingIntervalRef.current = setInterval(() => {
         if (currentIndex < message.length) {
@@ -30,10 +37,23 @@ const StoneTextOverlay = ({
           onTypingComplete && onTypingComplete();
         }
       }, typingSpeed);
-    } else {
-      // 메시지가 없거나 보이지 않을 때
+    } else if (!isVisible && displayedText) {
+      // 메시지가 보이지 않을 때 페이드아웃
+      setFadeOpacity(0);
+      // 페이드아웃 완료 후 텍스트 초기화
+      setTimeout(() => {
+        setDisplayedText('');
+        setIsTyping(false);
+      }, 1500); // transition 시간과 동일
+      
+      if (typingIntervalRef.current) {
+        clearInterval(typingIntervalRef.current);
+      }
+    } else if (!message) {
+      // 메시지가 없을 때
       setDisplayedText('');
       setIsTyping(false);
+      setFadeOpacity(0);
       if (typingIntervalRef.current) {
         clearInterval(typingIntervalRef.current);
       }
@@ -46,7 +66,7 @@ const StoneTextOverlay = ({
     };
   }, [message, isVisible]);
 
-  if (!isVisible && !isLoading) return null;
+  if (!isVisible && !isLoading && !displayedText) return null;
 
   return (
     <div
@@ -81,9 +101,9 @@ const StoneTextOverlay = ({
           <div
             style={{
               color: 'rgba(0, 0, 0, 0.6)',
-              fontSize: '18px',
-              fontFamily: 'serif',
-              fontWeight: 'bold',
+              fontSize: '16px', // 18px에서 16px로 감소
+              fontFamily: '"Nanum Myeongjo", serif', // Nanum Myeongjo 폰트 적용
+              fontWeight: '800', // 800 (Extra Bold) 적용
               textShadow: '1px 1px 2px rgba(255, 255, 255, 0.3)',
               lineHeight: '1.6',
               animation: 'pulse 2s infinite'
@@ -96,39 +116,25 @@ const StoneTextOverlay = ({
           <div
             style={{
               color: 'rgba(0, 0, 0, 0.9)', // 검은색 텍스트
-              fontSize: '20px',
-              fontFamily: 'serif',
-              fontWeight: 'bold',
+              fontSize: '18px', // 20px에서 18px로 감소
+              fontFamily: '"Nanum Myeongjo", serif', // Nanum Myeongjo 폰트 적용
+              fontWeight: '800', // 800 (Extra Bold) 적용
               textShadow: '1px 1px 3px rgba(255, 255, 255, 0.4)', // 비석에 새긴 느낌
               lineHeight: '1.7',
               letterSpacing: '0.5px',
               wordBreak: 'keep-all',
               maxWidth: '100%',
-              position: 'relative'
+              position: 'relative',
+              opacity: fadeOpacity, // 페이드인 효과 적용
+              transition: 'opacity 1.5s ease-in-out' // 부드러운 페이드인 전환
             }}
           >
             {displayedText}
-            {isTyping && (
-              <span
-                style={{
-                  animation: 'blink 1s infinite',
-                  marginLeft: '2px',
-                  color: 'rgba(0, 0, 0, 0.7)'
-                }}
-              >
-                |
-              </span>
-            )}
           </div>
         )}
       </div>
       
       <style jsx>{`
-        @keyframes blink {
-          0%, 50% { opacity: 1; }
-          51%, 100% { opacity: 0; }
-        }
-        
         @keyframes pulse {
           0% { opacity: 1; }
           50% { opacity: 0.6; }

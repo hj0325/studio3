@@ -69,9 +69,10 @@ const UserInputBar = ({
             border: '1px solid rgba(255, 255, 255, 0.2)',
             backgroundColor: 'rgba(255, 255, 255, 0.05)',
             color: 'white',
-            fontSize: '16px',
+            fontSize: '15px',
             outline: 'none',
-            fontFamily: 'inherit',
+            fontFamily: '"Nanum Myeongjo", serif',
+            fontWeight: '800',
             transition: 'all 0.3s ease',
             '::placeholder': {
               color: 'rgba(255, 255, 255, 0.5)'
@@ -104,8 +105,9 @@ const UserInputBar = ({
             cursor: userInput.trim() && !isLoading && canSendMessage 
               ? 'pointer' 
               : 'not-allowed',
-            fontSize: '16px',
-            fontWeight: '500',
+            fontSize: '14px',
+            fontFamily: '"Nanum Myeongjo", serif',
+            fontWeight: '800',
             transition: 'all 0.3s ease',
             minWidth: '80px'
           }}

@@ -11,8 +11,12 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
   const [isMessageVisible, setIsMessageVisible] = useState(false); // 메시지 표시 여부
   const [canUserSend, setCanUserSend] = useState(false); // 사용자 입력 가능 여부
   const [isTypingComplete, setIsTypingComplete] = useState(false); // 타이핑 완료 여부
+  const [showExitModal, setShowExitModal] = useState(false); // 신전 나가기 모달 표시 여부
+  const [isConversationComplete, setIsConversationComplete] = useState(false); // 대화 완료 상태
   
   const genAI = useRef(null);
+  const exitTimerRef = useRef(null); // 15초 후 모달 표시 타이머
+  const autoExitTimerRef = useRef(null); // 5초 후 자동 나가기 타이머
 
   // Google Gemini AI 초기화
   useEffect(() => {
@@ -24,6 +28,14 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
   // 컴포넌트가 비활성화되면 모든 상태 리셋
   useEffect(() => {
     if (!isActive) {
+      // 모든 타이머 정리
+      if (exitTimerRef.current) {
+        clearTimeout(exitTimerRef.current);
+      }
+      if (autoExitTimerRef.current) {
+        clearTimeout(autoExitTimerRef.current);
+      }
+      
       setCurrentStep(0);
       setUserResponses([]);
       setCurrentVayaMessage('');
@@ -31,6 +43,8 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
       setIsMessageVisible(false);
       setCanUserSend(false);
       setIsTypingComplete(false);
+      setShowExitModal(false);
+      setIsConversationComplete(false);
     }
   }, [isActive]);
 
@@ -174,7 +188,58 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
   const handleTypingComplete = () => {
     setIsTypingComplete(true);
     setCanUserSend(true);
+    
+    // 마지막 단계이고 대화가 완료된 경우 15초 후 모달 표시
+    if (currentStep === 4 && isConversationComplete) {
+      exitTimerRef.current = setTimeout(() => {
+        setShowExitModal(true);
+        // 모달 표시 후 5초 뒤 자동 나가기
+        autoExitTimerRef.current = setTimeout(() => {
+          handleExitYes();
+        }, 5000);
+      }, 15000);
+    }
   };
+
+  // 신전 나가기 - YES
+  const handleExitYes = () => {
+    // 모든 타이머 정리
+    if (exitTimerRef.current) {
+      clearTimeout(exitTimerRef.current);
+    }
+    if (autoExitTimerRef.current) {
+      clearTimeout(autoExitTimerRef.current);
+    }
+    
+    setShowExitModal(false);
+    onComplete && onComplete();
+  };
+
+  // 신전 나가기 - NO
+  const handleExitNo = () => {
+    // 모든 타이머 정리
+    if (exitTimerRef.current) {
+      clearTimeout(exitTimerRef.current);
+    }
+    if (autoExitTimerRef.current) {
+      clearTimeout(autoExitTimerRef.current);
+    }
+    
+    setShowExitModal(false);
+    // 메시지는 계속 유지됨
+  };
+
+  // 컴포넌트 언마운트 시 타이머 정리
+  useEffect(() => {
+    return () => {
+      if (exitTimerRef.current) {
+        clearTimeout(exitTimerRef.current);
+      }
+      if (autoExitTimerRef.current) {
+        clearTimeout(autoExitTimerRef.current);
+      }
+    };
+  }, []);
 
   // 사용자 메시지 전송 핸들러
   const handleUserMessage = async (message) => {
@@ -216,11 +281,11 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
           setCurrentVayaMessage(text);
           
           if (currentStep === 3) {
-            // 대화 완료
+            // 대화 완료 - 메시지는 계속 유지
             console.log('대화 완료');
-            setTimeout(() => {
-              onComplete && onComplete();
-            }, 8000); // 마지막 메시지를 읽을 시간을 더 줌
+            setIsConversationComplete(true);
+            setCurrentStep(4); // 완료 단계로 변경
+            // 메시지 사라지지 않고 계속 유지됨
           } else {
             const nextStep = currentStep + 1;
             setCurrentStep(nextStep);
@@ -256,6 +321,107 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
         canSendMessage={canUserSend && isTypingComplete}
         placeholder={`바야에게 답변해 주세요... (${currentStep}/3)`}
       />
+
+      {/* 신전 나가기 모달 */}
+      {showExitModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2000,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: 'rgba(20, 20, 20, 0.95)',
+              border: '2px solid rgba(255, 255, 255, 0.3)',
+              borderRadius: '15px',
+              padding: '40px',
+              textAlign: 'center',
+              maxWidth: '400px',
+              backdropFilter: 'blur(10px)',
+            }}
+          >
+            <div
+              style={{
+                color: 'white',
+                fontSize: '18px',
+                fontFamily: '"Nanum Myeongjo", serif',
+                fontWeight: '800',
+                marginBottom: '30px',
+                lineHeight: '1.6',
+              }}
+            >
+              신전을 나가시겠습니까?
+            </div>
+            
+            <div
+              style={{
+                display: 'flex',
+                gap: '20px',
+                justifyContent: 'center',
+              }}
+            >
+              <button
+                onClick={handleExitYes}
+                style={{
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  fontSize: '16px',
+                  fontFamily: '"Nanum Myeongjo", serif',
+                  fontWeight: '800',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                }}
+              >
+                YES
+              </button>
+              
+              <button
+                onClick={handleExitNo}
+                style={{
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  fontSize: '16px',
+                  fontFamily: '"Nanum Myeongjo", serif',
+                  fontWeight: '800',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                  e.target.style.color = 'white';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                  e.target.style.color = 'rgba(255, 255, 255, 0.8)';
+                }}
+              >
+                NO
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
