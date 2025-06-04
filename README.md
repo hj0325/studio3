@@ -129,3 +129,29 @@ studio3/
 - Arduino와 시리얼 모니터를 동시에 사용하지 마세요
 - 포트 권한 문제 시 `sudo` 사용 또는 사용자를 dialout 그룹에 추가
 - 기존 디자인 요소는 전혀 변경되지 않았습니다
+
+# Google Cloud TTS 설정
+
+VayaVoiceChat에서 자연스러운 음성을 사용하려면 Google Cloud Text-to-Speech API를 설정해야 합니다.
+
+## 1. Google Cloud TTS API 설정
+
+1. [Google Cloud Console](https://console.cloud.google.com/)에서 프로젝트 생성
+2. Text-to-Speech API 활성화
+3. 서비스 계정 생성 및 JSON 키 다운로드
+4. API 키 또는 서비스 계정 키 발급
+
+## 2. 환경변수 설정
+
+`.env.local` 파일을 프로젝트 루트에 생성하고 다음을 추가:
+
+```
+GOOGLE_CLOUD_TTS_API_KEY=your_google_cloud_tts_api_key_here
+NEXT_PUBLIC_GOOGLE_API_KEY=your_existing_gemini_api_key
+```
+
+## 3. TTS 기능
+
+- 바야의 메시지가 타이핑 완료되면 자동으로 음성으로 읽어줌
+- Google Cloud TTS 실패 시 브라우저 내장 TTS로 fallback
+- 신전 나가기 시 자동으로 음성 중지

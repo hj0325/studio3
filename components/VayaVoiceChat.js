@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import UserInputBar from './UserInputBar';
 import StoneTextOverlay from './StoneTextOverlay';
+import { speakText, stopSpeaking } from '../utils/tts';
 
 const VayaVoiceChat = ({ isActive, onComplete }) => {
   const [currentStep, setCurrentStep] = useState(0); // 0: 소개, 1-3: 질문 단계, 4: 완료
@@ -28,6 +29,9 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
   // 컴포넌트가 비활성화되면 모든 상태 리셋
   useEffect(() => {
     if (!isActive) {
+      // TTS 중지
+      stopSpeaking();
+      
       // 모든 타이머 정리
       if (exitTimerRef.current) {
         clearTimeout(exitTimerRef.current);
@@ -189,6 +193,14 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
     setIsTypingComplete(true);
     setCanUserSend(true);
     
+    // 바야의 메시지를 음성으로 읽기 (TTS)
+    if (currentVayaMessage && currentVayaMessage.trim()) {
+      console.log('TTS 시작:', currentVayaMessage);
+      speakText(currentVayaMessage).catch(error => {
+        console.error('TTS 오류:', error);
+      });
+    }
+    
     // 마지막 단계이고 대화가 완료된 경우 15초 후 모달 표시
     if (currentStep === 4 && isConversationComplete) {
       exitTimerRef.current = setTimeout(() => {
@@ -203,6 +215,9 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
 
   // 신전 나가기 - YES
   const handleExitYes = () => {
+    // TTS 중지
+    stopSpeaking();
+    
     // 모든 타이머 정리
     if (exitTimerRef.current) {
       clearTimeout(exitTimerRef.current);
@@ -217,6 +232,8 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
 
   // 신전 나가기 - NO
   const handleExitNo = () => {
+    // TTS 중지하지 않음 (메시지가 계속 유지되므로)
+    
     // 모든 타이머 정리
     if (exitTimerRef.current) {
       clearTimeout(exitTimerRef.current);
@@ -232,6 +249,9 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
   // 컴포넌트 언마운트 시 타이머 정리
   useEffect(() => {
     return () => {
+      // TTS 중지
+      stopSpeaking();
+      
       if (exitTimerRef.current) {
         clearTimeout(exitTimerRef.current);
       }
