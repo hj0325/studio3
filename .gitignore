@@ -39,3 +39,68 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 🔒 보안 및 개인정보 관련 파일들
+# Google Cloud 서비스 계정 키 파일들
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!next.config.js
+!jsconfig.json
+
+# API 키 및 비밀 정보
+api-keys.txt
+secrets.txt
+credentials.txt
+config.json
+
+# 데이터베이스 관련
+*.db
+*.sqlite
+*.sqlite3
+
+# 로그 파일들
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# 임시 파일들
+temp/
+tmp/
+*.tmp
+*.temp
+
+# 백업 파일들
+*.backup
+*.bak
+*~
+
+# IDE 및 에디터 설정
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# 운영체제 파일들
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# 사용자 업로드 파일들 (필요시 주석 해제)
+# uploads/
+# user-content/
+
+# 빌드 및 캐시 파일들
+.cache/
+dist/
+build/
+.parcel-cache/
+
+# 테스트 관련
+coverage/
+.nyc_output/
+test-results/
