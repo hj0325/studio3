@@ -13,7 +13,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log('🎭 Google Cloud TTS (Charon) 시작:', text.trim());
+    console.log('🎭 Google Cloud TTS (Vaya) 시작:', text.trim());
 
     // 서비스 계정 키 파일 경로
     const keyFilePath = path.join(process.cwd(), 'pages', 'api', 'vaya-voice-9a75a34cc232.json');
@@ -33,14 +33,14 @@ export default async function handler(req, res) {
     const detectedLanguage = detectLanguage(text.trim());
     console.log('🌍 감지된 언어:', detectedLanguage);
 
-    // Charon 음성 설정 (언어별 최적화)
+    // Vaya 음성 설정 (더 낮고 성숙한 음성)
     const voiceConfig = detectedLanguage === 'ko-KR' ? {
       languageCode: 'ko-KR',
-      name: 'ko-KR-Neural2-C', // 한국어 남성 음성
+      name: 'ko-KR-Neural2-C', // 한국어 남성 음성 (가장 낮은 톤)
       ssmlGender: 'MALE'
     } : {
       languageCode: 'en-US', 
-      name: 'en-US-Neural2-D', // 영어 남성 음성 (Charon 스타일)
+      name: 'en-US-Neural2-A', // 영어 남성 음성 (더 깊고 성숙한 목소리)
       ssmlGender: 'MALE'
     };
 
@@ -50,14 +50,18 @@ export default async function handler(req, res) {
       audioConfig: {
         audioEncoding: 'MP3',
         effectsProfileId: ['headphone-class-device'], // 헤드폰 최적화
-        // Turn coverage와 Affective dialog 기능 활성화
+        // 더 낮고 성숙한 음성을 위한 설정
+        pitch: -5.0, // 음성을 더 낮게
+        speakingRate: 0.85, // 조금 더 천천히 말하기
         enableTimePointing: true
       }
     };
 
-    console.log('🎭 Charon 음성 요청:', {
+    console.log('🎭 Vaya 음성 요청:', {
       voice: request.voice.name,
-      language: request.voice.languageCode
+      language: request.voice.languageCode,
+      pitch: request.audioConfig.pitch,
+      speakingRate: request.audioConfig.speakingRate
     });
 
     // Google Cloud TTS API 호출
@@ -71,10 +75,10 @@ export default async function handler(req, res) {
     const audioBase64 = response.audioContent.toString('base64');
     
     const voiceName = detectedLanguage === 'ko-KR' ? 
-      'Charon (ko-KR-Neural2-C)' : 
-      'Charon (en-US-Neural2-D)';
+      'Vaya (ko-KR-Neural2-C, 낮은 톤)' : 
+      'Vaya (en-US-Neural2-A, 깊은 톤)';
     
-    console.log('✅ Google Cloud TTS (Charon) 성공!');
+    console.log('✅ Google Cloud TTS (Vaya) 성공!');
     
     res.status(200).json({ 
       audioContent: audioBase64,
@@ -85,7 +89,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('🔥 Google Cloud TTS (Charon) 오류:', error.message);
+    console.error('🔥 Google Cloud TTS (Vaya) 오류:', error.message);
     
     // Google TTS 실패 시 브라우저 TTS fallback
     return res.status(500).json({ 

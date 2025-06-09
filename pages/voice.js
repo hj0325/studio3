@@ -290,8 +290,8 @@ export default function HomePage() {
   const [conversationLog, setConversationLog] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [voiceSettings, setVoiceSettings] = useState({
-    rate: 0.8,
-    pitch: 0.3,
+    rate: 0.75,  // 조금 더 천천히 (더 성숙한 느낌)
+    pitch: 0.1,  // 더 낮은 음성 (더 깊고 성숙한 느낌)
     volume: 1.0,
     voiceIndex: 0
   });
@@ -430,7 +430,7 @@ export default function HomePage() {
       if (maleVoice) {
         const maleIndex = sortedVoices.indexOf(maleVoice);
         console.log('남성 음성 찾음:', maleVoice.name);
-        setVoiceSettings(prev => ({ ...prev, voiceIndex: maleIndex, pitch: 0.1 }));
+        setVoiceSettings(prev => ({ ...prev, voiceIndex: maleIndex, pitch: 0.05 })); // 매우 낮은 음성
       } else {
         console.log('남성 음성을 찾지 못함, 기본 음성 사용');
       }
@@ -465,8 +465,8 @@ export default function HomePage() {
     console.log('음성 합성 테스트 시작');
     const testUtterance = new SpeechSynthesisUtterance('음성 테스트입니다.');
     testUtterance.volume = 1.0;
-    testUtterance.rate = 0.8;
-    testUtterance.pitch = 0.5;
+    testUtterance.rate = 0.75;  // Vaya의 느린 속도
+    testUtterance.pitch = 0.1;  // Vaya의 낮은 음성
     testUtterance.lang = 'ko-KR';
     
     testUtterance.onstart = () => console.log('테스트 음성 시작');
@@ -595,8 +595,8 @@ export default function HomePage() {
           console.log('기본 음성으로 재시도');
           const retryUtterance = new SpeechSynthesisUtterance(text);
           retryUtterance.voice = null; // 기본 음성 사용
-          retryUtterance.rate = 0.8;
-          retryUtterance.pitch = 0.5;
+          retryUtterance.rate = 0.75;  // Vaya의 느린 속도
+                      retryUtterance.pitch = 0.1;  // Vaya의 낮은 음성
           retryUtterance.volume = 1.0;
           retryUtterance.lang = 'ko-KR';
           
@@ -893,7 +893,7 @@ export default function HomePage() {
     setVayaStage(1);
     setIsProcessing(true);
     
-    const vayaIntroduction = "저는 '바야'입니다. 당신의 내면에 잠시 머물러 조용히 마음의 소리를 함께 들어드릴게요. 오늘 당신은 무엇을 놓아주고 싶나요?";
+    const vayaIntroduction = "저는 '바야'입니다. 당신에게 세가지 질문을 하며, 당신의 내면에 잠시 머물러 조용히 마음의 소리를 함께 들어드릴게요. 오늘 당신은 무엇을 놓아주고 싶나요?";
     
     setAiResponse(vayaIntroduction);
     setConversationLog([{ speaker: 'VAYA', message: vayaIntroduction, timestamp: new Date() }]);

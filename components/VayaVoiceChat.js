@@ -82,7 +82,7 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
 - 추가 설명이나 다른 말을 하지 마세요
 
 **정확한 응답:**
-"저는 '바야'입니다. 당신의 내면에 잠시 머물러 조용히 마음의 소리를 함께 들어드릴게요. 오늘 당신은 무엇을 놓아주고 싶나요?"
+"저는 '바야'입니다. 당신에게 세가지 질문을 하며, 당신의 내면에 잠시 머물러 조용히 마음의 소리를 함께 들어드릴게요. 오늘 당신은 무엇을 놓아주고 싶나요?"
 
 **경고: 위 문장 외 다른 말을 하면 안 됩니다.**`;
       
@@ -177,6 +177,10 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
       
       console.log('LLM 응답:', text);
       
+      // 새로운 메시지 설정 전에 이전 TTS 중지 (시작 메시지도 마찬가지)
+      console.log('🔇 첫 메시지 설정 전 TTS 중지');
+      stopSpeaking();
+      
       setCurrentVayaMessage(text);
       setCurrentStep(1);
       console.log('단계 업데이트: 0 -> 1');
@@ -193,14 +197,6 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
     setIsTypingComplete(true);
     setCanUserSend(true);
     
-    // 바야의 메시지를 음성으로 읽기 (TTS)
-    if (currentVayaMessage && currentVayaMessage.trim()) {
-      console.log('TTS 시작:', currentVayaMessage);
-      speakText(currentVayaMessage).catch(error => {
-        console.error('TTS 오류:', error);
-      });
-    }
-    
     // 마지막 단계이고 대화가 완료된 경우 15초 후 모달 표시
     if (currentStep === 4 && isConversationComplete) {
       exitTimerRef.current = setTimeout(() => {
@@ -210,6 +206,24 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
           handleExitYes();
         }, 5000);
       }, 15000);
+    }
+  };
+
+  // 타이핑 시작 후 적절한 타이밍에 TTS 시작하는 핸들러
+  const handleTTSStartTiming = () => {
+    // 이전 TTS 먼저 중지
+    console.log('🔇 이전 TTS 중지 후 새로운 TTS 시작');
+    stopSpeaking();
+    
+    // 바야의 메시지를 음성으로 읽기 (TTS) - 타이핑 시작 후 짧은 딜레이로 더 자연스럽게
+    if (currentVayaMessage && currentVayaMessage.trim()) {
+      console.log('🎭 TTS 시작 (최적화된 타이밍):', currentVayaMessage.slice(0, 50) + '...');
+      // 타이핑이 어느 정도 진행된 후 TTS 시작 (더 자연스러운 타이밍)
+      setTimeout(() => {
+        speakText(currentVayaMessage).catch(error => {
+          console.error('🔥 TTS 오류:', error);
+        });
+      }, 800); // 0.8초 후 TTS 시작 (타이핑과 거의 동시에)
     }
   };
 
@@ -267,6 +281,10 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
     console.log('현재 단계:', currentStep);
     console.log('사용자 응답:', message);
     
+    // 이전 TTS 즉시 중지
+    console.log('🔇 사용자 응답 시 TTS 중지');
+    stopSpeaking();
+    
     // 사용자 입력 비활성화
     setCanUserSend(false);
     setIsTypingComplete(false);
@@ -297,6 +315,10 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
           const text = aiResponse.text();
           
           console.log('LLM 응답:', text);
+          
+          // 새로운 메시지 설정 전에 이전 TTS 중지
+          console.log('🔇 새 메시지 설정 전 TTS 중지');
+          stopSpeaking();
           
           setCurrentVayaMessage(text);
           
@@ -331,6 +353,7 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
         isVisible={isMessageVisible}
         isLoading={isLoading}
         onTypingComplete={handleTypingComplete}
+        onTTSStartTiming={handleTTSStartTiming}
       />
       
       {/* 하단 사용자 입력창 */}

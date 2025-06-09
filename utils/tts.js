@@ -14,11 +14,15 @@ export const speakText = async (text) => {
     return;
   }
 
-  console.log('🎭 TTS 시작:', text.trim());
+  console.log('🎭 TTS 시작:', text.trim().slice(0, 50) + '...');
 
   try {
-    // 기존 음성 중지
+    // 기존 음성 강제 중지 (중요!)
+    console.log('🔇 새 TTS 시작 전 모든 음성 중지');
     stopSpeaking();
+    
+    // 중지 완료를 위한 짧은 대기
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     // 1. Google Cloud TTS (Charon) 시도
     const response = await fetch('/api/tts', {
@@ -39,18 +43,18 @@ export const speakText = async (text) => {
       }
     }
     
-    console.log('🔄 Google Cloud TTS 실패, Charon 스타일 브라우저 TTS로 전환');
+    console.log('🔄 Google Cloud TTS 실패, Vaya 스타일 브라우저 TTS로 전환');
     
   } catch (error) {
     console.error('🔥 Google Cloud TTS API 호출 오류:', error);
-    console.log('🔄 Charon 스타일 브라우저 TTS로 전환');
+    console.log('🔄 Vaya 스타일 브라우저 TTS로 전환');
   }
 
-  // 2. Charon 스타일 브라우저 TTS fallback
+  // 2. Vaya 스타일 브라우저 TTS fallback
   try {
     await speakWithBrowserTTS(text);
   } catch (error) {
-    console.error('🔥 Charon 스타일 브라우저 TTS도 실패:', error);
+    console.error('🔥 Vaya 스타일 브라우저 TTS도 실패:', error);
     throw error;
   }
 };
@@ -238,13 +242,29 @@ const playBrowserTTS = async (text) => {
  * 현재 재생 중인 음성 중지
  */
 export const stopSpeaking = () => {
-  console.log('🔇 TTS 중지');
+  console.log('🔇 TTS 전체 중지');
+  
+  // 브라우저 TTS 중지
   if (window.speechSynthesis) {
     window.speechSynthesis.cancel();
   }
+  
+  // 현재 utterance 초기화
   if (currentUtterance) {
     currentUtterance = null;
   }
+  
+  // Google Cloud TTS 오디오 중지
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
+  }
+  
+  // 상태 초기화
+  isSpeaking = false;
+  
+  console.log('✅ 모든 TTS 중지 완료');
 };
 
 /**
@@ -271,27 +291,39 @@ const playBase64Audio = (audioBase64) => {
       // Audio 객체 생성 및 재생
       const audio = new Audio(URL.createObjectURL(audioBlob));
       
+      // 현재 오디오로 설정
+      currentAudio = audio;
+      isSpeaking = true;
+      
       audio.onloadeddata = () => {
         console.log('🎭 Google Cloud TTS 오디오 로드 완료');
       };
       
       audio.onplay = () => {
-        console.log('🎭 Google Cloud TTS (Charon) 재생 시작');
+        console.log('🎭 Google Cloud TTS (Vaya) 재생 시작');
       };
       
       audio.onended = () => {
-        console.log('✅ Google Cloud TTS (Charon) 재생 완료');
+        console.log('✅ Google Cloud TTS (Vaya) 재생 완료');
         URL.revokeObjectURL(audio.src);
+        currentAudio = null;
+        isSpeaking = false;
         resolve();
       };
       
       audio.onerror = (error) => {
         console.error('🔥 Google Cloud TTS 오디오 재생 오류:', error);
         URL.revokeObjectURL(audio.src);
+        currentAudio = null;
+        isSpeaking = false;
         reject(error);
       };
       
-      audio.play().catch(reject);
+      audio.play().catch((error) => {
+        currentAudio = null;
+        isSpeaking = false;
+        reject(error);
+      });
       
     } catch (error) {
       console.error('🔥 Base64 오디오 변환 오류:', error);
@@ -396,18 +428,21 @@ const speakWithBrowserTTS = (text) => {
     });
     
     utterance.onstart = () => {
-      console.log('🎭 Charon 스타일 브라우저 TTS 시작');
+      console.log('🎭 Vaya 스타일 브라우저 TTS 시작');
+      isSpeaking = true;
     };
     
     utterance.onend = () => {
-      console.log('✅ Charon 스타일 브라우저 TTS 완료');
+      console.log('✅ Vaya 스타일 브라우저 TTS 완료');
       currentUtterance = null;
+      isSpeaking = false;
       resolve();
     };
     
     utterance.onerror = (error) => {
-      console.error('🔥 Charon 스타일 브라우저 TTS 오류:', error);
+      console.error('🔥 Vaya 스타일 브라우저 TTS 오류:', error);
       currentUtterance = null;
+      isSpeaking = false;
       reject(error);
     };
     

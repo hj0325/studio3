@@ -4,6 +4,7 @@ const StoneTextOverlay = ({
   message, 
   isVisible, 
   onTypingComplete,
+  onTTSStartTiming,
   isLoading 
 }) => {
   const [displayedText, setDisplayedText] = useState('');
@@ -25,6 +26,13 @@ const StoneTextOverlay = ({
       setTimeout(() => {
         setFadeOpacity(1);
       }, 100);
+
+      // TTS 시작 타이밍 호출 (타이핑 시작과 거의 동시에)
+      if (onTTSStartTiming) {
+        setTimeout(() => {
+          onTTSStartTiming();
+        }, 200); // 페이드인 후 TTS 시작
+      }
       
       typingIntervalRef.current = setInterval(() => {
         if (currentIndex < message.length) {
