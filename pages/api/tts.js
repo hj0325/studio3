@@ -13,7 +13,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log('🎭 Google Cloud TTS (Vaya) 시작:', text.trim());
+    const trimmedText = text.trim();
+    console.log('🎭 Google Cloud TTS (Vaya) 시작:', {
+      text: trimmedText.slice(0, 50) + '...',
+      length: trimmedText.length,
+      timestamp: new Date().toISOString()
+    });
 
     // 서비스 계정 키 파일 경로
     const keyFilePath = path.join(process.cwd(), 'pages', 'api', 'vaya-voice-9a75a34cc232.json');
@@ -44,8 +49,15 @@ export default async function handler(req, res) {
       ssmlGender: 'MALE'
     };
 
+    // SSML로 더 낮고 섬세한 목소리 만들기
+    const ssmlText = `<speak>
+      <prosody pitch="-4st">
+        ${text.trim()}
+      </prosody>
+    </speak>`;
+
     const request = {
-      input: { text: text.trim() },
+      input: { ssml: ssmlText },
       voice: voiceConfig,
       audioConfig: {
         audioEncoding: 'MP3',
@@ -57,11 +69,12 @@ export default async function handler(req, res) {
       }
     };
 
-    console.log('🎭 Vaya 음성 요청:', {
+    console.log('🎭 Vaya 음성 요청 (SSML + 에코):', {
       voice: request.voice.name,
       language: request.voice.languageCode,
       pitch: request.audioConfig.pitch,
-      speakingRate: request.audioConfig.speakingRate
+      speakingRate: request.audioConfig.speakingRate,
+      ssml: 'prosody pitch="-4st" (기본 속도)'
     });
 
     // Google Cloud TTS API 호출
@@ -75,10 +88,10 @@ export default async function handler(req, res) {
     const audioBase64 = response.audioContent.toString('base64');
     
     const voiceName = detectedLanguage === 'ko-KR' ? 
-      'Vaya (ko-KR-Neural2-C, 낮은 톤)' : 
-      'Vaya (en-US-Neural2-A, 깊은 톤)';
+      'Vaya (ko-KR-Neural2-C, SSML + 에코)' : 
+      'Vaya (en-US-Neural2-A, SSML + 에코)';
     
-    console.log('✅ Google Cloud TTS (Vaya) 성공!');
+    console.log('✅ Google Cloud TTS (Vaya) + SSML + 에코 효과 성공!');
     
     res.status(200).json({ 
       audioContent: audioBase64,

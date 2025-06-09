@@ -2,6 +2,9 @@
 let currentAudio = null;
 let currentUtterance = null;
 let isSpeaking = false;
+let currentAudioContext = null;
+let currentAudioSource = null;
+let lastProcessedText = null; // 중복 처리 방지
 
 /**
  * Google Cloud TTS를 우선 사용하고, 실패 시 브라우저 TTS를 사용
@@ -14,15 +17,24 @@ export const speakText = async (text) => {
     return;
   }
 
-  console.log('🎭 TTS 시작:', text.trim().slice(0, 50) + '...');
+  const trimmedText = text.trim();
+  
+  // 🎯 중복 처리 방지: 같은 텍스트는 무시
+  if (lastProcessedText === trimmedText) {
+    console.log('⚠️ 동일한 텍스트 중복 요청 무시:', trimmedText.slice(0, 30) + '...');
+    return;
+  }
+
+  console.log('🎭 TTS 시작:', trimmedText.slice(0, 50) + '...');
+  lastProcessedText = trimmedText; // 현재 처리 중인 텍스트 저장
 
   try {
     // 기존 음성 강제 중지 (중요!)
     console.log('🔇 새 TTS 시작 전 모든 음성 중지');
     stopSpeaking();
     
-    // 중지 완료를 위한 짧은 대기
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // 중지 완료를 위한 충분한 대기 (Web Audio API 완전 중지)
+    await new Promise(resolve => setTimeout(resolve, 200));
 
     // 1. Google Cloud TTS (Charon) 시도
     const response = await fetch('/api/tts', {
@@ -242,29 +254,58 @@ const playBrowserTTS = async (text) => {
  * 현재 재생 중인 음성 중지
  */
 export const stopSpeaking = () => {
-  console.log('🔇 TTS 전체 중지');
-  
-  // 브라우저 TTS 중지
-  if (window.speechSynthesis) {
-    window.speechSynthesis.cancel();
-  }
-  
-  // 현재 utterance 초기화
-  if (currentUtterance) {
-    currentUtterance = null;
-  }
-  
-  // Google Cloud TTS 오디오 중지
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio.currentTime = 0;
-    currentAudio = null;
-  }
-  
-  // 상태 초기화
-  isSpeaking = false;
-  
-  console.log('✅ 모든 TTS 중지 완료');
+  return new Promise(async (resolve) => {
+    console.log('🔇 모든 음성 중지 시도');
+    
+    // 1. Web Audio API 중지
+    if (currentAudioContext) {
+      console.log('- Web Audio Context 중지');
+      await currentAudioContext.close().catch(console.error);
+      currentAudioContext = null;
+    }
+    
+    if (currentAudioSource) {
+      console.log('- Audio Source 중지');
+      try {
+        currentAudioSource.stop();
+      } catch (e) {
+        console.log('- Audio Source 이미 중지됨');
+      }
+      currentAudioSource = null;
+    }
+
+    // 2. HTML5 Audio 중지
+    if (currentAudio) {
+      console.log('- HTML5 Audio 중지');
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      currentAudio.src = ''; // 리소스 해제
+      currentAudio = null;
+    }
+
+    // 3. 브라우저 TTS 중지
+    if (window.speechSynthesis) {
+      console.log('- 브라우저 TTS 중지');
+      window.speechSynthesis.cancel();
+      // 완전한 중지를 위한 추가 대기
+      await new Promise(r => setTimeout(r, 50));
+    }
+
+    if (currentUtterance) {
+      console.log('- 현재 Utterance 중지');
+      currentUtterance = null;
+    }
+
+    // 상태 초기화
+    isSpeaking = false;
+    lastProcessedText = null;
+    
+    // 모든 중지 작업이 완료될 때까지 짧게 대기
+    await new Promise(r => setTimeout(r, 50));
+    
+    console.log('✅ 모든 음성 중지 완료');
+    resolve();
+  });
 };
 
 /**
@@ -275,9 +316,9 @@ export const getIsSpeaking = () => {
   return isSpeaking;
 };
 
-// Base64 오디오 재생 함수
+// Base64 오디오 재생 함수 (에코 효과 적용)
 const playBase64Audio = (audioBase64) => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       // Base64를 Blob으로 변환
       const byteCharacters = atob(audioBase64);
@@ -288,42 +329,110 @@ const playBase64Audio = (audioBase64) => {
       const byteArray = new Uint8Array(byteNumbers);
       const audioBlob = new Blob([byteArray], { type: 'audio/mpeg' });
       
-      // Audio 객체 생성 및 재생
-      const audio = new Audio(URL.createObjectURL(audioBlob));
-      
-      // 현재 오디오로 설정
-      currentAudio = audio;
-      isSpeaking = true;
-      
-      audio.onloadeddata = () => {
-        console.log('🎭 Google Cloud TTS 오디오 로드 완료');
-      };
-      
-      audio.onplay = () => {
-        console.log('🎭 Google Cloud TTS (Vaya) 재생 시작');
-      };
-      
-      audio.onended = () => {
-        console.log('✅ Google Cloud TTS (Vaya) 재생 완료');
-        URL.revokeObjectURL(audio.src);
-        currentAudio = null;
-        isSpeaking = false;
-        resolve();
-      };
-      
-      audio.onerror = (error) => {
-        console.error('🔥 Google Cloud TTS 오디오 재생 오류:', error);
-        URL.revokeObjectURL(audio.src);
-        currentAudio = null;
-        isSpeaking = false;
-        reject(error);
-      };
-      
-      audio.play().catch((error) => {
-        currentAudio = null;
-        isSpeaking = false;
-        reject(error);
-      });
+      // Web Audio API를 사용한 에코 효과
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const response = await fetch(URL.createObjectURL(audioBlob));
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+        const source = audioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        
+        // 전역 변수에 저장 (중지를 위해)
+        currentAudioContext = audioContext;
+        currentAudioSource = source;
+
+        // 🎭 에코 효과용 Delay Node (아주 살짝만)
+        const delay = audioContext.createDelay();
+        delay.delayTime.value = 0.15; // 0.15초 (살짝 짧은 메아리)
+
+        // 🎭 에코 강도 조절용 Gain Node (아주 약하게)
+        const feedback = audioContext.createGain();
+        feedback.gain.value = 0.1; // 더 약한 메아리
+
+        // 🎭 에코 볼륨 조절 (기본 목소리보다 훨씬 작게)
+        const echoGain = audioContext.createGain();
+        echoGain.gain.value = 0.3; // 에코는 원본의 30% 볼륨
+
+        // 🎭 원본 음성 볼륨 조절
+        const mainGain = audioContext.createGain();
+        mainGain.gain.value = 0.9; // 원본 음성
+
+        // 🎭 에코 루프 연결
+        delay.connect(feedback);
+        feedback.connect(delay);
+
+        // 🎭 오디오 경로 연결 (딜레이 없는 원본 + 낮은 볼륨 에코)
+        source.connect(mainGain); // 원본: 딜레이 없이 바로 재생
+        source.connect(delay); // 에코: 딜레이 후 재생
+        
+        mainGain.connect(audioContext.destination); // 원본 음성 (딜레이 없음)
+        delay.connect(echoGain); // 에코에 볼륨 조절 적용
+        echoGain.connect(audioContext.destination); // 에코 음성 (낮은 볼륨)
+
+        // 상태 설정
+        currentAudio = { 
+          pause: () => source.stop(),
+          currentTime: 0,
+          src: URL.createObjectURL(audioBlob)
+        };
+        isSpeaking = true;
+
+        console.log('🎭 Google Cloud TTS (Vaya) + 최적화된 에코 효과 재생 시작 (에코 30% 볼륨)');
+
+        source.onended = () => {
+          console.log('✅ Google Cloud TTS (Vaya) + 최적화된 에코 효과 재생 완료');
+          URL.revokeObjectURL(audioBlob);
+          currentAudio = null;
+          currentAudioContext = null;
+          currentAudioSource = null;
+          isSpeaking = false;
+          resolve();
+        };
+
+        source.start();
+
+      } catch (webAudioError) {
+        console.warn('⚠️ Web Audio API 실패, 일반 오디오로 재생:', webAudioError);
+        
+        // Web Audio API 실패 시 일반 Audio 객체 사용
+        const audio = new Audio(URL.createObjectURL(audioBlob));
+        
+        // 현재 오디오로 설정
+        currentAudio = audio;
+        isSpeaking = true;
+        
+        audio.onloadeddata = () => {
+          console.log('🎭 Google Cloud TTS 오디오 로드 완료');
+        };
+        
+        audio.onplay = () => {
+          console.log('🎭 Google Cloud TTS (Vaya) 재생 시작');
+        };
+        
+        audio.onended = () => {
+          console.log('✅ Google Cloud TTS (Vaya) 재생 완료');
+          URL.revokeObjectURL(audio.src);
+          currentAudio = null;
+          isSpeaking = false;
+          resolve();
+        };
+        
+        audio.onerror = (error) => {
+          console.error('🔥 Google Cloud TTS 오디오 재생 오류:', error);
+          URL.revokeObjectURL(audio.src);
+          currentAudio = null;
+          isSpeaking = false;
+          reject(error);
+        };
+        
+        audio.play().catch((error) => {
+          currentAudio = null;
+          isSpeaking = false;
+          reject(error);
+        });
+      }
       
     } catch (error) {
       console.error('🔥 Base64 오디오 변환 오류:', error);

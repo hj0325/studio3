@@ -215,15 +215,29 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
     console.log('🔇 이전 TTS 중지 후 새로운 TTS 시작');
     stopSpeaking();
     
-    // 바야의 메시지를 음성으로 읽기 (TTS) - 타이핑 시작 후 짧은 딜레이로 더 자연스럽게
+    // 바야의 메시지를 음성으로 읽기 (TTS)
     if (currentVayaMessage && currentVayaMessage.trim()) {
-      console.log('🎭 TTS 시작 (최적화된 타이밍):', currentVayaMessage.slice(0, 50) + '...');
-      // 타이핑이 어느 정도 진행된 후 TTS 시작 (더 자연스러운 타이밍)
-      setTimeout(() => {
-        speakText(currentVayaMessage).catch(error => {
-          console.error('🔥 TTS 오류:', error);
-        });
-      }, 800); // 0.8초 후 TTS 시작 (타이핑과 거의 동시에)
+      // 🎯 중요: 현재 메시지를 고정
+      const messageToSpeak = currentVayaMessage;
+      const messageId = Date.now(); // 현재 메시지의 고유 ID
+      console.log('🎭 TTS 준비 (메시지 ID: ' + messageId + '):', messageToSpeak.slice(0, 50) + '...');
+      
+      // 타이핑이 시작된 직후 TTS 시작 (더 빠른 응답)
+      setTimeout(async () => {
+        // 메시지가 변경되었거나 비어있으면 취소
+        if (messageToSpeak !== currentVayaMessage || !currentVayaMessage) {
+          console.log('⚠️ 메시지 변경됨, TTS 취소 (ID: ' + messageId + ')');
+          return;
+        }
+
+        try {
+          console.log('✅ TTS 시작 (ID: ' + messageId + ')');
+          await speakText(messageToSpeak);
+          console.log('✅ TTS 완료 (ID: ' + messageId + ')');
+        } catch (error) {
+          console.error('🔥 TTS 오류 (ID: ' + messageId + '):', error);
+        }
+      }, 100); // 0.1초 후 시작 (더 빠른 응답)
     }
   };
 
@@ -260,6 +274,17 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
     // 메시지는 계속 유지됨
   };
 
+  // currentVayaMessage 변경 추적
+  useEffect(() => {
+    if (currentVayaMessage) {
+      console.log('📝 바야 메시지 업데이트됨:', {
+        step: currentStep,
+        message: currentVayaMessage.slice(0, 50) + '...',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }, [currentVayaMessage]);
+
   // 컴포넌트 언마운트 시 타이머 정리
   useEffect(() => {
     return () => {
@@ -281,16 +306,18 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
     console.log('현재 단계:', currentStep);
     console.log('사용자 응답:', message);
     
-    // 이전 TTS 즉시 중지
-    console.log('🔇 사용자 응답 시 TTS 중지');
+    // 이전 TTS와 메시지를 완전히 중지/제거
+    console.log('🔇 사용자 응답 시 이전 상태 초기화');
     stopSpeaking();
+    setCurrentVayaMessage(''); // 이전 메시지 초기화
     
-    // 사용자 입력 비활성화
+    // 상태 초기화
     setCanUserSend(false);
     setIsTypingComplete(false);
-    
-    // 기존 메시지를 천천히 사라지게 함
     setIsMessageVisible(false);
+    
+    // 중지 완료를 위한 대기
+    await new Promise(resolve => setTimeout(resolve, 200));
     
     // 사용자 응답 저장
     const newResponses = [...userResponses, message];
