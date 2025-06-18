@@ -241,8 +241,8 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
     }
   };
 
-  // 신전 나가기 - YES
-  const handleExitYes = () => {
+  // 3초 후 자동으로 첫 번째 페이지로 리셋
+  const handleAutoReset = () => {
     // TTS 중지
     stopSpeaking();
     
@@ -258,21 +258,16 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
     onComplete && onComplete();
   };
 
-  // 신전 나가기 - NO
-  const handleExitNo = () => {
-    // TTS 중지하지 않음 (메시지가 계속 유지되므로)
-    
-    // 모든 타이머 정리
-    if (exitTimerRef.current) {
-      clearTimeout(exitTimerRef.current);
+  // showExitModal이 true가 되면 3초 후 자동으로 첫 번째 페이지로 리셋
+  useEffect(() => {
+    if (showExitModal) {
+      const resetTimer = setTimeout(() => {
+        handleAutoReset();
+      }, 3000); // 3초 후 자동 리셋
+
+      return () => clearTimeout(resetTimer);
     }
-    if (autoExitTimerRef.current) {
-      clearTimeout(autoExitTimerRef.current);
-    }
-    
-    setShowExitModal(false);
-    // 메시지는 계속 유지됨
-  };
+  }, [showExitModal]);
 
   // currentVayaMessage 변경 추적
   useEffect(() => {
@@ -415,7 +410,7 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
               borderRadius: '15px',
               padding: '40px',
               textAlign: 'center',
-              maxWidth: '400px',
+              maxWidth: '500px',
               backdropFilter: 'blur(10px)',
             }}
           >
@@ -425,69 +420,12 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
                 fontSize: '18px',
                 fontFamily: '"Nanum Myeongjo", serif',
                 fontWeight: '800',
-                marginBottom: '30px',
                 lineHeight: '1.6',
               }}
             >
-              신전을 나가시겠습니까?
-            </div>
-            
-            <div
-              style={{
-                display: 'flex',
-                gap: '20px',
-                justifyContent: 'center',
-              }}
-            >
-              <button
-                onClick={handleExitYes}
-                style={{
-                  padding: '12px 24px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  color: 'white',
-                  fontSize: '16px',
-                  fontFamily: '"Nanum Myeongjo", serif',
-                  fontWeight: '800',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
-                }}
-              >
-                YES
-              </button>
-              
-              <button
-                onClick={handleExitNo}
-                style={{
-                  padding: '12px 24px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  color: 'rgba(255, 255, 255, 0.8)',
-                  fontSize: '16px',
-                  fontFamily: '"Nanum Myeongjo", serif',
-                  fontWeight: '800',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
-                  e.target.style.color = 'white';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                  e.target.style.color = 'rgba(255, 255, 255, 0.8)';
-                }}
-              >
-                NO
-              </button>
+              삶의 여정이 끝났습니다.
+              <br />
+              바야를 들어 제자리게 놓아주세요.
             </div>
           </div>
         </div>

@@ -309,7 +309,7 @@ const imagesData = [
       zIndex: 3,
       left: '50%',
       bottom: '71%',
-      height: '4%',
+      height: '3%',
       width: 'auto',
       transform: 'translateX(-50%)',
     },
@@ -323,7 +323,6 @@ export default function HomePage() {
   const [nextScreen, setNextScreen] = useState(false);
   const [nextScreenOpacity, setNextScreenOpacity] = useState(0);
   const [isVayaActive, setIsVayaActive] = useState(false);
-  const [textOpacity, setTextOpacity] = useState(1); // 깜빡이는 텍스트를 위한 상태 추가
 
   const handleScreenClick = useCallback(() => {
     // 다음 화면에서는 클릭 시 첫 번째 화면으로 돌아감
@@ -511,7 +510,14 @@ export default function HomePage() {
   // VAYA 대화 완료 핸들러
   const handleVayaComplete = () => {
     setIsVayaActive(false);
-    // 대화 완료 후 추가 로직이 필요하면 여기에 추가
+    // 첫 번째 화면으로 완전히 리셋
+    setNextScreen(false);
+    setAnimationStage('initial');
+    setIsDimmed(false);
+    setDimStep(0);
+    setFadeStep(0);
+    setIntroOpacity(0);
+    setNextScreenOpacity(0);
   };
 
   // 다음 화면 페이드인 애니메이션
@@ -533,27 +539,12 @@ export default function HomePage() {
     }
   }, [nextScreen]);
 
-  // 깜빡이는 효과를 위한 useEffect 추가
-  useEffect(() => {
-    if (animationStage === 'initial') {
-      const interval = setInterval(() => {
-        setTextOpacity(prev => prev === 1 ? 0.3 : 1);
-      }, 1500); // 1.5초마다 깜빡임
-
-      return () => clearInterval(interval);
-    }
-  }, [animationStage]);
-
   return (
     <>
       <Head>
         <title>Studio 3 Interactive Art</title>
         <meta name="description" content="Interactive scroll animation project" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500&display=swap"
-          rel="stylesheet"
-        />
         <style jsx global>{`
           html, body {
             padding: 0;
@@ -772,27 +763,6 @@ export default function HomePage() {
           </>
         )}
         
-        {/* 안내 문구 */}
-        {!nextScreen && (
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '13%',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              color: '#fff',
-              fontFamily: "'Noto Serif KR', serif",
-              fontSize: '1.2rem',
-              zIndex: 15,
-              opacity: animationStage === 'initial' ? textOpacity : 0,
-              transition: 'opacity 0.5s ease-in-out',
-              textAlign: 'center',
-            }}
-          >
-            인센스를 꽂아 바야와의 대화를 시작하세요
-          </div>
-        )}
-
         {/* 두 번째 화면 */}
         {nextScreen && (
           <>
