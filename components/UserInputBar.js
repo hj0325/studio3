@@ -60,7 +60,7 @@ const UserInputBar = ({
           backgroundPosition: 'center bottom',
           zIndex: 999,
           pointerEvents: 'none', // 배경은 클릭 이벤트를 받지 않음
-          opacity: 0.8, // 전체 투명도
+          opacity: 0.85, // 전체 투명도
         }}
       />
       
@@ -73,7 +73,7 @@ const UserInputBar = ({
           right: 0,
           height: '120px',
           padding: '20px',
-          zIndex: 1000,
+          zIndex: 1010,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

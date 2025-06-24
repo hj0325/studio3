@@ -861,7 +861,7 @@ export default function HomePage() {
               alt="새 인간"
               style={{
                 ...imageStyles,
-                zIndex: 6,
+                zIndex: 1001,
                 left: '30%',
                 top: '70%',
                 width: 'auto',
@@ -879,7 +879,7 @@ export default function HomePage() {
               alt="새 인간"
               style={{
                 ...imageStyles,
-                zIndex: 6,
+                zIndex: 1002,
                 left: '47%',
                 top: '43%',
                 width: 'auto',
@@ -897,7 +897,7 @@ export default function HomePage() {
               alt="꽃"
               style={{
                 ...imageStyles,
-                zIndex: 2,
+                zIndex: 1003,
                 left: '70%',
                 top: '60%',
                 width: 'auto',
@@ -915,7 +915,7 @@ export default function HomePage() {
               alt="꽃"
               style={{
                 ...imageStyles,
-                zIndex: 2,
+                zIndex: 1004,
                 left: '58%',
                 top: '75%',
                 width: 'auto',
@@ -933,7 +933,7 @@ export default function HomePage() {
               alt="꽃"
               style={{
                 ...imageStyles,
-                zIndex: 2,
+                zIndex: 1005,
                 left: '-2.4%',
                 top: '60%',
                 width: 'auto',
@@ -950,7 +950,7 @@ export default function HomePage() {
               alt="꽃"
               style={{
                 ...imageStyles,
-                zIndex: 2,
+                zIndex: 1006,
                 left: '18%',
                 top: '75%',
                 width: 'auto',
