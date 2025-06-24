@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 const UserInputBar = ({ 
   isActive, 
@@ -8,6 +8,19 @@ const UserInputBar = ({
   placeholder = "마음을 편히 말씀해 주세요..." 
 }) => {
   const [userInput, setUserInput] = useState('');
+  const inputRef = useRef(null);
+
+  // 컴포넌트가 활성화되고 메시지 전송이 가능할 때 자동으로 포커스
+  useEffect(() => {
+    if (isActive && canSendMessage && inputRef.current) {
+      // 약간의 딜레이를 두어 렌더링이 완료된 후 포커스
+      const timer = setTimeout(() => {
+        inputRef.current.focus();
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isActive, canSendMessage]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -57,6 +70,7 @@ const UserInputBar = ({
         }}
       >
         <input
+          ref={inputRef}
           type="text"
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}

@@ -397,6 +397,25 @@ export default function HomePage() {
     };
   }, [handleScreenClick]);
 
+  // 엔터키 이벤트 리스너 추가
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      // 엔터키가 눌리고, 바야가 활성화되지 않은 상태에서만 실행
+      if (event.key === 'Enter' && !isVayaActive) {
+        console.log('엔터키 감지! 화면 전환 이벤트 실행');
+        handleScreenClick();
+      }
+    };
+
+    // 키보드 이벤트 리스너 등록
+    window.addEventListener('keydown', handleKeyPress);
+
+    // 컴포넌트 언마운트 시 이벤트 리스너 제거
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [handleScreenClick, isVayaActive]);
+
   useEffect(() => {
     if (isDimmed) {
       let step = 0;
@@ -552,14 +571,29 @@ export default function HomePage() {
             overflow: hidden;
             font-family: ${inter.style.fontFamily}, ${robotoMono.style.fontFamily}, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
             background: #000;
+            cursor: none !important;
           }
+          *, *:hover, *:focus, *:active {
+            cursor: none !important;
+            pointer-events: auto;
+          }
+          html {
+            cursor: none !important;
+          }
+          body {
+            cursor: none !important;
+          }
+          /* 모든 요소에 대해 커서 숨기기 */
+          div, img, input, button, form, main {
+            cursor: none !important;
+          }
+          /* 투명한 커서 이미지로 대체하는 fallback */
           * {
-            box-sizing: border-box;
+            cursor: url('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'), none !important;
           }
         `}</style>
       </Head>
       <main 
-        onClick={handleScreenClick}
         style={{
           fontFamily: `var(--font-inter), var(--font-roboto-mono)`,
           position: 'relative',
@@ -569,7 +603,7 @@ export default function HomePage() {
           padding: 0,
           overflow: 'hidden', 
           background: '#000',
-          cursor: nextScreen ? 'pointer' : (animationStage === 'introFinished' ? 'default' : 'pointer'),
+          cursor: 'none',
         }}
       >
         {/* 첫 번째 화면 */}
@@ -927,24 +961,7 @@ export default function HomePage() {
               draggable="false"
             />
 
-            {/* 문양 - 첫 번째 페이지로 돌아가는 버튼 */}
-             <img 
-              src="/New studio/문양.png"
-              alt="문양"
-              style={{
-                ...imageStyles,
-                zIndex: 2,
-                left: '0%',
-                top: '3%',
-                width: 'auto',
-                height: '15%',
-                objectFit: 'contain',
-                transform: 'scaleX(-1)',
-                opacity: nextScreenOpacity,
-                cursor: 'pointer',
-              }}
-              draggable="false"
-            />
+
             
             {/* 두 번째 화면 파티클 효과 - SmokeCanvasSecond */}
             <div style={{

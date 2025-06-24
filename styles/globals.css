@@ -32,19 +32,9 @@ body {
   cursor: none; /* 모든 요소의 커서 숨기기 */
 }
 
-/* 커스텀 커서 요소 */
+/* 커스텀 커서 요소 - 비활성화됨 */
 .custom-cursor {
-  position: fixed;
-  width: 100px;
-  height: 100px;
-  background-image: url('/cursor.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  pointer-events: none;
-  z-index: 9999;
-  transform: translate(-50%, -50%);
-  mix-blend-mode: difference;
+  display: none;
 }
 
 a {
@@ -59,5 +49,5 @@ a {
 }
 
 html {
-  cursor: url('/cursor.png'), auto !important;
+  cursor: none !important;
 }
