@@ -45,30 +45,52 @@ const UserInputBar = ({
   if (!isActive) return null;
 
   return (
-    <div 
-      style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-        backdropFilter: 'blur(10px)',
-        borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-        padding: '20px',
-        zIndex: 1000,
-      }}
-      onClick={(e) => e.stopPropagation()}
-    >
-      <form 
-        onSubmit={handleSubmit}
+    <>
+      {/* 배경 SVG */}
+      <div 
         style={{
-          maxWidth: '800px',
-          margin: '0 auto',
-          display: 'flex',
-          gap: '15px',
-          alignItems: 'center'
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '900px',
+          backgroundImage: 'url(/채팅.svg)',
+          backgroundSize: '105% auto',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center bottom',
+          zIndex: 999,
+          pointerEvents: 'none', // 배경은 클릭 이벤트를 받지 않음
+          opacity: 0.8, // 전체 투명도
         }}
+      />
+      
+      {/* 채팅창 */}
+      <div 
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '120px',
+          padding: '20px',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+        onClick={(e) => e.stopPropagation()}
       >
+        <form 
+          onSubmit={handleSubmit}
+          style={{
+            maxWidth: '600px',
+            width: '100%',
+            display: 'flex',
+            gap: '15px',
+            alignItems: 'center',
+            position: 'relative',
+          }}
+        >
         <input
           ref={inputRef}
           type="text"
@@ -80,25 +102,26 @@ const UserInputBar = ({
             flex: 1,
             padding: '15px 20px',
             borderRadius: '25px',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            border: '2px solid rgba(255, 255, 255, 0.3)',
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
             color: 'white',
             fontSize: '15px',
             outline: 'none',
             fontFamily: '"Nanum Myeongjo", serif',
             fontWeight: '800',
             transition: 'all 0.3s ease',
+            backdropFilter: 'blur(5px)',
             '::placeholder': {
               color: 'rgba(255, 255, 255, 0.5)'
             }
           }}
           onFocus={(e) => {
-            e.target.style.borderColor = 'rgba(255, 255, 255, 0.4)';
-            e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+            e.target.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+            e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
           }}
           onBlur={(e) => {
-            e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-            e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+            e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+            e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
           }}
         />
         
@@ -109,13 +132,13 @@ const UserInputBar = ({
           style={{
             padding: '15px 25px',
             borderRadius: '25px',
-            border: 'none',
+            border: '2px solid rgba(255, 255, 255, 0.3)',
             backgroundColor: userInput.trim() && !isLoading && canSendMessage 
-              ? 'rgba(255, 255, 255, 0.2)' 
-              : 'rgba(255, 255, 255, 0.05)',
+              ? 'rgba(0, 0, 0, 0.8)' 
+              : 'rgba(0, 0, 0, 0.5)',
             color: userInput.trim() && !isLoading && canSendMessage 
               ? 'white' 
-              : 'rgba(255, 255, 255, 0.3)',
+              : 'rgba(255, 255, 255, 0.5)',
             cursor: userInput.trim() && !isLoading && canSendMessage 
               ? 'pointer' 
               : 'not-allowed',
@@ -123,29 +146,33 @@ const UserInputBar = ({
             fontFamily: '"Nanum Myeongjo", serif',
             fontWeight: '800',
             transition: 'all 0.3s ease',
-            minWidth: '80px'
+            minWidth: '80px',
+            backdropFilter: 'blur(5px)',
           }}
           onMouseEnter={(e) => {
             if (userInput.trim() && !isLoading && canSendMessage) {
-              e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+              e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+              e.target.style.borderColor = 'rgba(255, 255, 255, 0.5)';
             }
           }}
           onMouseLeave={(e) => {
             if (userInput.trim() && !isLoading && canSendMessage) {
-              e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+              e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+              e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
             }
           }}
         >
           {isLoading ? '...' : '전송'}
         </button>
-      </form>
+        </form>
+      </div>
       
       <style jsx>{`
         input::placeholder {
           color: rgba(255, 255, 255, 0.5);
         }
       `}</style>
-    </div>
+    </>
   );
 };
 
