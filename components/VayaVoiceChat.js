@@ -425,7 +425,7 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
             >
               삶의 여정이 끝났습니다.
               <br />
-              바야를 들어 제자리게 놓아주세요.
+              바야를 들어 제자리에 놓아주세요.
             </div>
           </div>
         </div>
