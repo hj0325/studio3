@@ -324,9 +324,25 @@ export default function HomePage() {
   const [nextScreenOpacity, setNextScreenOpacity] = useState(0);
   const [isVayaActive, setIsVayaActive] = useState(false);
 
+  // 최신 상태를 참조하기 위한 ref들
+  const animationStageRef = useRef(animationStage);
+  const nextScreenRef = useRef(nextScreen);
+  
+  // ref 값들을 최신 상태로 업데이트
+  useEffect(() => {
+    animationStageRef.current = animationStage;
+  }, [animationStage]);
+  
+  useEffect(() => {
+    nextScreenRef.current = nextScreen;
+  }, [nextScreen]);
+
   const handleScreenClick = useCallback(() => {
+    console.log('[CLICK] handleScreenClick 호출됨 - 현재 상태:', { animationStage, nextScreen, isDimmed });
+    
     // 다음 화면에서는 클릭 시 첫 번째 화면으로 돌아감
     if (nextScreen) {
+      console.log('[CLICK] 다음 화면에서 첫 번째 화면으로 돌아감');
       setNextScreen(false);
       setAnimationStage('initial');
       setIsDimmed(false);
@@ -339,8 +355,12 @@ export default function HomePage() {
     }
 
     // 애니메이션이 완료된 상태나 소개글 단계에서는 클릭 무시
-    if (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut' || animationStage === 'introFinished') return;
+    if (animationStage === 'finished' || animationStage === 'showingIntro' || animationStage === 'introFadingOut' || animationStage === 'introFinished') {
+      console.log('[CLICK] 애니메이션 진행 중이므로 클릭 무시:', animationStage);
+      return;
+    }
     
+    console.log('[CLICK] handleScreenClick 실행 - 블러링 시작');
     setIsDimmed(true);
     setAnimationStage('blurring');
   }, [animationStage, nextScreen]);
@@ -362,10 +382,23 @@ export default function HomePage() {
             const data = JSON.parse(event.data);
             console.log('WebSocket 메시지 수신:', data);
 
-            // Arduino 신호를 받으면 화면 클릭과 동일한 동작 실행
+            // Arduino 신호를 받으면 첫 번째 화면에서만 화면 클릭과 동일한 동작 실행
             if (data.type === 'arduino_signal' && data.message === 'ON') {
-              console.log('Arduino 신호 감지! 화면 클릭 이벤트 실행');
-              handleScreenClick();
+              // ref를 사용해서 최신 상태값 참조
+              const currentAnimationStage = animationStageRef.current;
+              const currentNextScreen = nextScreenRef.current;
+              
+              console.log(`[ARDUINO] 현재 상태 - animationStage: ${currentAnimationStage}, nextScreen: ${currentNextScreen}`);
+              
+              // 첫 번째 화면(initial 상태)이고 다음 화면으로 넘어가지 않은 상태에서만 실행
+              if (currentAnimationStage === 'initial' && !currentNextScreen) {
+                console.log('[ARDUINO] Arduino 신호 감지! 첫 번째 화면에서 화면 클릭 이벤트 실행');
+                console.log('[ARDUINO] handleScreenClick 호출 전 상태 확인');
+                handleScreenClick();
+                console.log('[ARDUINO] handleScreenClick 호출 완료');
+              } else {
+                console.log(`[ARDUINO] Arduino 신호 수신했지만 첫 번째 화면이 아니므로 무시 (stage: ${currentAnimationStage}, nextScreen: ${currentNextScreen})`);
+              }
             }
           } catch (error) {
             console.error('WebSocket 메시지 파싱 오류:', error);
@@ -400,10 +433,12 @@ export default function HomePage() {
   // 엔터키 이벤트 리스너 추가
   useEffect(() => {
     const handleKeyPress = (event) => {
-      // 엔터키가 눌리고, 바야가 활성화되지 않은 상태에서만 실행
-      if (event.key === 'Enter' && !isVayaActive) {
-        console.log('엔터키 감지! 화면 전환 이벤트 실행');
+      // 엔터키가 눌리고, 첫 번째 화면이며, 바야가 활성화되지 않은 상태에서만 실행
+      if (event.key === 'Enter' && animationStage === 'initial' && !nextScreen && !isVayaActive) {
+        console.log('[ENTER] 엔터키 감지! 첫 번째 화면에서 화면 전환 이벤트 실행');
+        console.log('[ENTER] handleScreenClick 호출 전 상태 확인');
         handleScreenClick();
+        console.log('[ENTER] handleScreenClick 호출 완료');
       }
     };
 
@@ -414,7 +449,7 @@ export default function HomePage() {
     return () => {
       window.removeEventListener('keydown', handleKeyPress);
     };
-  }, [handleScreenClick, isVayaActive]);
+  }, [handleScreenClick, animationStage, nextScreen, isVayaActive]);
 
   useEffect(() => {
     if (isDimmed) {
@@ -425,10 +460,13 @@ export default function HomePage() {
           step = 1;
           clearInterval(interval);
           // 블러 애니메이션이 끝나면 로고 표시 단계로 전환
+          console.log('블러링 완료 - 로고 표시 단계로 전환');
           setTimeout(() => {
+            console.log('로고 표시 시작');
             setAnimationStage('logoShowing');
             // 3초 후 페이드아웃 시작
             setTimeout(() => {
+              console.log('페이드아웃 시작');
               setAnimationStage('fadingOut');
             }, 3000);
           }, 500);
@@ -446,12 +484,14 @@ export default function HomePage() {
 
   useEffect(() => {
     if (animationStage === 'fadingOut') {
+      console.log('페이드아웃 애니메이션 시작');
       let step = 0;
       const interval = setInterval(() => {
         step += 0.02; // 천천히 페이드아웃
         if (step >= 1) {
           step = 1;
           clearInterval(interval);
+          console.log('페이드아웃 완료 - finished 상태로 전환');
           setAnimationStage('finished');
         }
         setFadeStep(step);
@@ -466,7 +506,9 @@ export default function HomePage() {
   // finished 상태 후 소개글 표시 로직
   useEffect(() => {
     if (animationStage === 'finished') {
+      console.log('finished 상태 - 1초 후 소개글 표시');
       const timer = setTimeout(() => {
+        console.log('소개글 표시 시작');
         setAnimationStage('showingIntro');
       }, 1000);
       return () => clearTimeout(timer);
@@ -508,8 +550,12 @@ export default function HomePage() {
   // 소개글이 끝나면 바로 다음 화면으로 전환
   useEffect(() => {
     if (animationStage === 'introFinished') {
+      console.log('소개글 완료 - 1초 후 다음 화면으로 전환');
       setTimeout(() => {
+        console.log('다음 화면으로 전환 시작');
+        setAnimationStage('nextScreen'); // 애니메이션 스테이지도 업데이트
         setNextScreen(true);
+        console.log('setNextScreen(true) 실행됨');
       }, 1000); // 1초 후 다음 화면으로 바로 전환
     }
   }, [animationStage]);
@@ -517,7 +563,9 @@ export default function HomePage() {
   // 다음 화면이 완전히 나타나면 VAYA 대화 시작
   useEffect(() => {
     if (nextScreen && nextScreenOpacity >= 1) {
+      console.log('다음 화면 완전히 표시됨 - 2초 후 VAYA 시작');
       setTimeout(() => {
+        console.log('VAYA 음성 대화 시작');
         setIsVayaActive(true);
       }, 2000); // 다음 화면이 완전히 나타난 후 2초 뒤 VAYA 시작
     } else if (!nextScreen) {
@@ -542,12 +590,14 @@ export default function HomePage() {
   // 다음 화면 페이드인 애니메이션
   useEffect(() => {
     if (nextScreen) {
+      console.log('다음 화면 페이드인 애니메이션 시작');
       let opacityValue = 0;
       const interval = setInterval(() => {
         opacityValue += 0.05;
         if (opacityValue >= 1) {
           opacityValue = 1;
           clearInterval(interval);
+          console.log('다음 화면 페이드인 완료');
         }
         setNextScreenOpacity(opacityValue);
       }, 16);
