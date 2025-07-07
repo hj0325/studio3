@@ -54,20 +54,20 @@ export default async function handler(req, res) {
     const detectedLanguage = detectLanguage(text.trim());
     console.log('🌍 감지된 언어:', detectedLanguage);
 
-    // Vaya 음성 설정 (원래 설정으로 복원)
+    // Vaya 음성 설정 (자연스럽게 수정)
     const voiceConfig = detectedLanguage === 'ko-KR' ? {
       languageCode: 'ko-KR',
-      name: 'ko-KR-Neural2-C', // 한국어 남성 음성 (가장 낮은 톤)
+      name: 'ko-KR-Neural2-C', // 한국어 남성 음성
       ssmlGender: 'MALE'
     } : {
       languageCode: 'en-US', 
-      name: 'en-US-Neural2-A', // 영어 남성 음성 (더 깊고 성숙한 목소리)
+      name: 'en-US-Neural2-A', // 영어 남성 음성
       ssmlGender: 'MALE'
     };
 
-    // SSML로 더 낮고 섬세한 목소리 만들기
+    // SSML로 자연스럽고 차분한 목소리 만들기
     const ssmlText = `<speak>
-      <prosody pitch="-4st">
+      <prosody rate="slow" pitch="-2st">
         ${text.trim()}
       </prosody>
     </speak>`;
@@ -78,19 +78,17 @@ export default async function handler(req, res) {
       audioConfig: {
         audioEncoding: 'MP3',
         effectsProfileId: ['headphone-class-device'], // 헤드폰 최적화
-        // 더 낮고 성숙한 음성을 위한 설정
-        pitch: -5.0, // 음성을 더 낮게
-        speakingRate: 0.85, // 조금 더 천천히 말하기
+        // 자연스러운 바야 음성 설정
+        speakingRate: 0.9, // 조금 천천히 (너무 느리지 않게)
         enableTimePointing: true
       }
     };
 
-    console.log('🎭 Vaya 음성 요청 (SSML + 에코):', {
+    console.log('🎭 Vaya 음성 요청 (자연스럽게 수정):', {
       voice: request.voice.name,
       language: request.voice.languageCode,
-      pitch: request.audioConfig.pitch,
       speakingRate: request.audioConfig.speakingRate,
-      ssml: 'prosody pitch="-4st" (기본 속도)'
+      ssml: 'prosody rate="slow" pitch="-2st"'
     });
 
     // Google Cloud TTS API 호출
@@ -104,10 +102,10 @@ export default async function handler(req, res) {
     const audioBase64 = response.audioContent.toString('base64');
     
     const voiceName = detectedLanguage === 'ko-KR' ? 
-      'Vaya (ko-KR-Neural2-C, SSML + 에코)' : 
-      'Vaya (en-US-Neural2-A, SSML + 에코)';
+      'Vaya (ko-KR-Neural2-C, 자연스러운 음성)' : 
+      'Vaya (en-US-Neural2-A, 자연스러운 음성)';
     
-    console.log('✅ Google Cloud TTS (Vaya) + SSML + 에코 효과 성공!');
+    console.log('✅ Google Cloud TTS (Vaya) 자연스러운 음성 성공!');
     
     res.status(200).json({ 
       audioContent: audioBase64,
