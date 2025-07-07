@@ -53,7 +53,7 @@ const UserInputBar = ({
           bottom: 0,
           left: 0,
           right: 0,
-          height: '900px',
+          height: 'min(60vh, 900px)', // 반응형 높이
           backgroundImage: 'url(/채팅.svg)',
           backgroundSize: '105% auto',
           backgroundRepeat: 'no-repeat',
@@ -71,8 +71,8 @@ const UserInputBar = ({
           bottom: 0,
           left: 0,
           right: 0,
-          height: '120px',
-          padding: '20px',
+          height: 'min(10vh, 120px)', // 반응형 높이
+          padding: 'min(1.5vw, 20px)', // 반응형 패딩
           zIndex: 1010,
           display: 'flex',
           alignItems: 'center',
@@ -83,10 +83,10 @@ const UserInputBar = ({
         <form 
           onSubmit={handleSubmit}
           style={{
-            maxWidth: '600px',
+            maxWidth: 'min(50vw, 600px)', // 반응형 최대 너비
             width: '100%',
             display: 'flex',
-            gap: '15px',
+            gap: 'min(1.2vw, 15px)', // 반응형 간격
             alignItems: 'center',
             position: 'relative',
           }}
@@ -100,12 +100,12 @@ const UserInputBar = ({
           disabled={isLoading || !canSendMessage}
           style={{
             flex: 1,
-            padding: '15px 20px',
-            borderRadius: '25px',
+            padding: 'min(1.2vw, 15px) min(1.6vw, 20px)', // 반응형 패딩
+            borderRadius: 'min(2vw, 25px)', // 반응형 둥근 모서리
             border: '2px solid rgba(255, 255, 255, 0.3)',
             backgroundColor: 'rgba(0, 0, 0, 0.7)',
             color: 'white',
-            fontSize: '15px',
+            fontSize: 'clamp(0.8rem, 1vw, 0.95rem)', // 조금 더 작게 조정 (원래 15px 수준)
             outline: 'none',
             fontFamily: '"Nanum Myeongjo", serif',
             fontWeight: '800',
@@ -130,8 +130,8 @@ const UserInputBar = ({
           onClick={handleSendClick}
           disabled={!userInput.trim() || isLoading || !canSendMessage}
           style={{
-            padding: '15px 25px',
-            borderRadius: '25px',
+            padding: 'min(1.2vw, 15px) min(2vw, 25px)', // 반응형 패딩
+            borderRadius: 'min(2vw, 25px)', // 반응형 둥근 모서리
             border: '2px solid rgba(255, 255, 255, 0.3)',
             backgroundColor: userInput.trim() && !isLoading && canSendMessage 
               ? 'rgba(0, 0, 0, 0.8)' 
@@ -142,11 +142,11 @@ const UserInputBar = ({
             cursor: userInput.trim() && !isLoading && canSendMessage 
               ? 'pointer' 
               : 'not-allowed',
-            fontSize: '14px',
+            fontSize: 'clamp(0.75rem, 0.9vw, 0.9rem)', // 조금 더 작게 조정 (원래 14px 수준)
             fontFamily: '"Nanum Myeongjo", serif',
             fontWeight: '800',
             transition: 'all 0.3s ease',
-            minWidth: '80px',
+            minWidth: 'min(6vw, 80px)', // 반응형 최소 너비
             backdropFilter: 'blur(5px)',
           }}
           onMouseEnter={(e) => {

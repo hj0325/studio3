@@ -472,23 +472,31 @@ const speakWithBrowserTTS = (text) => {
     let selectedVoice = null;
     
     if (detectedLanguage === 'ko-KR') {
-      // 한국어 음성 우선순위
-      const koreanPreferences = [
-        'Microsoft Heami',
-        'Microsoft SunHi', 
+      // 한국어 남성 음성 우선순위 (바야 스타일)
+      const koreanMalePreferences = [
+        'Microsoft Heami',    // 한국어 남성 음성
+        'Microsoft SunHi',    // 한국어 남성 음성
         'Google 한국의',
         'Yuna',
         'Sora'
       ];
       
-      for (const preference of koreanPreferences) {
+      for (const preference of koreanMalePreferences) {
         selectedVoice = voices.find(voice => 
           voice.name.includes(preference) && voice.lang.includes('ko')
         );
         if (selectedVoice) break;
       }
       
-      // 대안: 한국어 음성 아무거나
+      // 대안1: 한국어 남성 음성 찾기
+      if (!selectedVoice) {
+        selectedVoice = voices.find(voice => 
+          (voice.lang.includes('ko') || voice.lang.includes('KR')) &&
+          voice.name.toLowerCase().includes('male')
+        );
+      }
+      
+      // 대안2: 한국어 음성 아무거나
       if (!selectedVoice) {
         selectedVoice = voices.find(voice => 
           voice.lang.includes('ko') || voice.lang.includes('KR')
@@ -529,11 +537,19 @@ const speakWithBrowserTTS = (text) => {
     
     if (selectedVoice) {
       utterance.voice = selectedVoice;
-      console.log('🎭 Charon 스타일 음성 선택:', selectedVoice.name);
+      console.log('🎭 Vaya 스타일 음성 선택:', selectedVoice.name);
     }
     
-    console.log('🎭 Charon 스타일 브라우저 TTS 설정:', {
-      voice: selectedVoice?.name || '기본 음성'
+    // 🎭 Vaya 스타일 음성 설정 (낮고 천천히)
+    utterance.rate = 0.75;  // 천천히 말하기
+    utterance.pitch = 0.3;  // 낮은 음성 (남성적)
+    utterance.volume = 1.0; // 최대 볼륨
+    
+    console.log('🎭 Vaya 스타일 브라우저 TTS 설정:', {
+      voice: selectedVoice?.name || '기본 음성',
+      rate: utterance.rate,
+      pitch: utterance.pitch,
+      volume: utterance.volume
     });
     
     utterance.onstart = () => {

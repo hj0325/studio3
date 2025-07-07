@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently \"next dev\" \"nodemon server/arduino-websocket-server.js\"",
+    "dev:next-only": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "arduino-server": "nodemon server/arduino-websocket-server.js",
-    "dev:full": "concurrently \"yarn dev\" \"yarn arduino-server\""
+    "dev:full": "concurrently \"yarn dev:next-only\" \"yarn arduino-server\""
   },
   "dependencies": {
     "@google-cloud/text-to-speech": "^6.1.0",

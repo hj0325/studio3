@@ -1,5 +1,4 @@
 const { TextToSpeechClient } = require('@google-cloud/text-to-speech');
-const path = require('path');
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -20,14 +19,31 @@ export default async function handler(req, res) {
       timestamp: new Date().toISOString()
     });
 
-    // 서비스 계정 키 파일 경로
-    const keyFilePath = path.join(process.cwd(), 'pages', 'api', 'vaya-voice-9a75a34cc232.json');
+    // 환경변수에서 서비스 계정 키 가져오기 (Vercel 배포용)
+    let client;
     
-    // Google Cloud Text-to-Speech 클라이언트 초기화
-    const client = new TextToSpeechClient({
-      keyFilename: keyFilePath,
-      projectId: 'vaya-voice'
-    });
+    if (process.env.GOOGLE_SERVICE_ACCOUNT_KEY) {
+      // 환경변수에 JSON 문자열로 저장된 서비스 계정 키 사용
+      const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
+      client = new TextToSpeechClient({
+        credentials,
+        projectId: credentials.project_id
+      });
+      console.log('✅ Google Cloud TTS 클라이언트 초기화 (환경변수 사용)');
+    } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+      // 로컬 개발용 파일 경로
+      client = new TextToSpeechClient();
+      console.log('✅ Google Cloud TTS 클라이언트 초기화 (파일 경로 사용)');
+    } else {
+      // 로컬 개발용 기본 설정 (기존 방식)
+      const path = require('path');
+      const keyFilePath = path.join(process.cwd(), 'pages', 'api', 'vaya-voice-9a75a34cc232.json');
+      client = new TextToSpeechClient({
+        keyFilename: keyFilePath,
+        projectId: 'vaya-voice'
+      });
+      console.log('✅ Google Cloud TTS 클라이언트 초기화 (기본 파일 경로 사용)');
+    }
 
     // 텍스트 언어 감지 함수
     const detectLanguage = (text) => {
@@ -38,7 +54,7 @@ export default async function handler(req, res) {
     const detectedLanguage = detectLanguage(text.trim());
     console.log('🌍 감지된 언어:', detectedLanguage);
 
-    // Vaya 음성 설정 (더 낮고 성숙한 음성)
+    // Vaya 음성 설정 (원래 설정으로 복원)
     const voiceConfig = detectedLanguage === 'ko-KR' ? {
       languageCode: 'ko-KR',
       name: 'ko-KR-Neural2-C', // 한국어 남성 음성 (가장 낮은 톤)

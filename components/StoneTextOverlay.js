@@ -88,17 +88,17 @@ const StoneTextOverlay = ({
     <div
       style={{
         position: 'absolute',
-        left: '50%', // 49.5%에서 50%로 정확히 중앙 정렬
+        left: '50%',
         top: '50%',
-        width: '300px',
-        height: '400px',
+        width: 'min(18vw, 280px)', // 너비를 줄여서 비석의 흰색 영역 안에만 표시
+        height: 'min(30vh, 500px)', // viewport 기반 반응형 크기
         transform: 'translate(-50%, -50%)',
         zIndex: 10, // 비석 위에 표시
         pointerEvents: 'none',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '40px 30px',
+        padding: 'min(2vw, 25px) min(1.5vw, 20px)', // 패딩도 조금 줄임
       }}
     >
       <div
@@ -117,9 +117,9 @@ const StoneTextOverlay = ({
           <div
             style={{
               color: 'rgba(0, 0, 0, 0.6)',
-              fontSize: '16px', // 18px에서 16px로 감소
-              fontFamily: '"Nanum Myeongjo", serif', // Nanum Myeongjo 폰트 적용
-              fontWeight: '800', // 800 (Extra Bold) 적용
+              fontSize: 'clamp(0.95rem, 1.4vw, 1.1rem)', // 조금 키움
+              fontFamily: '"Nanum Myeongjo", serif',
+              fontWeight: '800',
               textShadow: '1px 1px 2px rgba(255, 255, 255, 0.3)',
               lineHeight: '1.6',
               animation: 'pulse 2s infinite'
@@ -132,9 +132,9 @@ const StoneTextOverlay = ({
           <div
             style={{
               color: 'rgba(0, 0, 0, 0.9)', // 검은색 텍스트
-              fontSize: '18px', // 20px에서 18px로 감소
-              fontFamily: '"Nanum Myeongjo", serif', // Nanum Myeongjo 폰트 적용
-              fontWeight: '800', // 800 (Extra Bold) 적용
+              fontSize: 'clamp(1.05rem, 1.6vw, 1.25rem)', // 조금 키움
+              fontFamily: '"Nanum Myeongjo", serif',
+              fontWeight: '800',
               textShadow: '1px 1px 3px rgba(255, 255, 255, 0.4)', // 비석에 새긴 느낌
               lineHeight: '1.7',
               letterSpacing: '0.5px',

@@ -324,18 +324,20 @@ export default function HomePage() {
   const [nextScreenOpacity, setNextScreenOpacity] = useState(0);
   const [isVayaActive, setIsVayaActive] = useState(false);
 
-  // 최신 상태를 참조하기 위한 ref들
-  const animationStageRef = useRef(animationStage);
-  const nextScreenRef = useRef(nextScreen);
-  
-  // ref 값들을 최신 상태로 업데이트
+  // useRef로 최신 상태를 추적
+  const animationStageRef = useRef('initial');
+  const nextScreenRef = useRef(false);
+
+  // animationStage와 nextScreen의 변화를 ref에 동기화
   useEffect(() => {
     animationStageRef.current = animationStage;
   }, [animationStage]);
-  
+
   useEffect(() => {
     nextScreenRef.current = nextScreen;
   }, [nextScreen]);
+
+
 
   const handleScreenClick = useCallback(() => {
     console.log('[CLICK] handleScreenClick 호출됨 - 현재 상태:', { animationStage, nextScreen, isDimmed });
@@ -640,6 +642,30 @@ export default function HomePage() {
           /* 투명한 커서 이미지로 대체하는 fallback */
           * {
             cursor: url('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'), none !important;
+          }
+          
+          /* 자막 애니메이션 */
+          @keyframes subtitleFadeIn {
+            0% { 
+              opacity: 0.6; 
+              transform: translateX(-50%) translateY(5px);
+            }
+            100% { 
+              opacity: 1; 
+              transform: translateX(-50%) translateY(0px);
+            }
+          }
+          
+          .subtitle-container {
+            animation: subtitleFadeIn 2s ease-in-out infinite alternate !important;
+            /* 애니메이션이 실패해도 기본적으로 보이도록 */
+            opacity: 0.9 !important;
+            /* 폰트 로딩 실패 대비 */
+            font-family: "Nanum Myeongjo", "나눔명조", "맑은 고딕", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif !important;
+            /* 더 강한 가시성 보장 */
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 16px;
+            border-radius: 8px;
           }
         `}</style>
       </Head>
@@ -1041,6 +1067,49 @@ export default function HomePage() {
               <CodeSandboxParticles />
             </div>
           </>
+        )}
+
+        {/* 엔터키 안내 자막 - 첫 페이지에서만 표시 */}
+        {animationStage === 'initial' && (
+          <div
+            className="subtitle-container"
+            style={{
+              position: 'absolute',
+              top: '30%',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 1000,
+              textAlign: 'center',
+              color: 'rgba(255, 255, 255, 0.9)',
+              fontSize: 'clamp(1rem, 2.5vw, 1.5rem)',
+              fontFamily: '"Nanum Myeongjo", "나눔명조", serif',
+              fontWeight: '500',
+              textShadow: '2px 2px 8px rgba(0, 0, 0, 0.8)',
+              letterSpacing: '1px',
+              pointerEvents: 'none',
+              userSelect: 'none'
+            }}
+          >
+            엔터키를 누르고 대화를 시작하세요
+          </div>
+        )}
+        
+        {/* 임시 디버깅 정보 - 배포 후 제거 예정 */}
+        {process.env.NODE_ENV !== 'production' && (
+          <div style={{
+            position: 'fixed',
+            top: '10px',
+            right: '10px',
+            background: 'rgba(0,0,0,0.8)',
+            color: 'white',
+            padding: '10px',
+            fontSize: '12px',
+            zIndex: 9999
+          }}>
+            animationStage: {animationStage}
+            <br />
+            nextScreen: {nextScreen ? 'true' : 'false'}
+          </div>
         )}
 
         {/* VAYA 음성 대화 컴포넌트 */}
