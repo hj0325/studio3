@@ -104,3 +104,6 @@ build/
 coverage/
 .nyc_output/
 test-results/
+# Google Cloud Service Account Keys
+pages/api/vaya-voice-*.json
+*.json
