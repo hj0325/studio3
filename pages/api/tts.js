@@ -79,6 +79,15 @@ export default async function handler(req, res) {
       }
     };
 
+    // 환경별 디버깅 정보 추가
+    const isVercel = process.env.GOOGLE_SERVICE_ACCOUNT_KEY ? true : false;
+    console.log('🔍 환경 정보:', {
+      environment: isVercel ? 'Vercel (환경변수)' : 'Local (파일)',
+      effectsProfileId: request.audioConfig.effectsProfileId,
+      pitch: request.audioConfig.pitch,
+      speakingRate: request.audioConfig.speakingRate
+    });
+
     console.log('🎭 Vaya 음성 요청 (SSML + 에코):', {
       voice: request.voice.name,
       language: request.voice.languageCode,
