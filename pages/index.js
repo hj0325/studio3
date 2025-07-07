@@ -1093,24 +1093,7 @@ export default function HomePage() {
             엔터키를 누르고 대화를 시작하세요
           </div>
         )}
-        
-        {/* 임시 디버깅 정보 - 배포 후 제거 예정 */}
-        {process.env.NODE_ENV !== 'production' && (
-          <div style={{
-            position: 'fixed',
-            top: '10px',
-            right: '10px',
-            background: 'rgba(0,0,0,0.8)',
-            color: 'white',
-            padding: '10px',
-            fontSize: '12px',
-            zIndex: 9999
-          }}>
-            animationStage: {animationStage}
-            <br />
-            nextScreen: {nextScreen ? 'true' : 'false'}
-          </div>
-        )}
+
 
         {/* VAYA 음성 대화 컴포넌트 */}
         <VayaVoiceChat 

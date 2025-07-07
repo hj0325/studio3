@@ -54,20 +54,20 @@ export default async function handler(req, res) {
     const detectedLanguage = detectLanguage(text.trim());
     console.log('🌍 감지된 언어:', detectedLanguage);
 
-    // Vaya 음성 설정 (자연스럽게 수정)
+    // Vaya 음성 설정 (원래 설정으로 복원)
     const voiceConfig = detectedLanguage === 'ko-KR' ? {
       languageCode: 'ko-KR',
-      name: 'ko-KR-Neural2-C', // 한국어 남성 음성
+      name: 'ko-KR-Neural2-C', // 한국어 남성 음성 (가장 낮은 톤)
       ssmlGender: 'MALE'
     } : {
       languageCode: 'en-US', 
-      name: 'en-US-Neural2-A', // 영어 남성 음성
+      name: 'en-US-Neural2-A', // 영어 남성 음성 (더 깊고 성숙한 목소리)
       ssmlGender: 'MALE'
     };
 
-    // SSML로 자연스럽고 차분한 목소리 만들기
+    // SSML로 더 낮고 섬세한 목소리 만들기
     const ssmlText = `<speak>
-      <prosody rate="slow" pitch="-2st">
+      <prosody pitch="-2st" rate="0.9">
         ${text.trim()}
       </prosody>
     </speak>`;
@@ -77,10 +77,11 @@ export default async function handler(req, res) {
       voice: voiceConfig,
       audioConfig: {
         audioEncoding: 'MP3',
-        effectsProfileId: ['headphone-class-device'], // 헤드폰 최적화
-        // 자연스러운 바야 음성 설정
-        speakingRate: 0.9, // 조금 천천히 (너무 느리지 않게)
-        enableTimePointing: true
+        sampleRateHertz: 24000, // 고품질 샘플 레이트
+        // 단순화된 설정으로 음질 개선
+        speakingRate: 0.9, // 적당한 속도
+        pitch: -2.0, // 적당한 낮은 음조
+        volumeGainDb: 0.0, // 기본 볼륨
       }
     };
 
