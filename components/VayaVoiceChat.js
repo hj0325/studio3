@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import UserInputBar from './UserInputBar';
 import StoneTextOverlay from './StoneTextOverlay';
 import { speakText, stopSpeaking } from '../utils/tts';
@@ -15,16 +14,24 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
   const [showExitModal, setShowExitModal] = useState(false); // 신전 나가기 모달 표시 여부
   const [isConversationComplete, setIsConversationComplete] = useState(false); // 대화 완료 상태
   
-  const genAI = useRef(null);
   const exitTimerRef = useRef(null); // 15초 후 모달 표시 타이머
   const autoExitTimerRef = useRef(null); // 5초 후 자동 나가기 타이머
 
-  // Google Gemini AI 초기화
-  useEffect(() => {
-    if (process.env.NEXT_PUBLIC_GOOGLE_API_KEY) {
-      genAI.current = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GOOGLE_API_KEY);
+  const generateGeminiText = async (prompt) => {
+    const response = await fetch('/api/llm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, model: 'gpt-4o-mini' }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const details = data?.details || data?.error || 'Unknown error';
+      throw new Error(details);
     }
-  }, []);
+
+    return data?.text || '';
+  };
 
   // 컴포넌트가 비활성화되면 모든 상태 리셋
   useEffect(() => {
@@ -166,14 +173,11 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
     setIsMessageVisible(true);
     
     try {
-      const model = genAI.current.getGenerativeModel({ model: "gemini-1.5-flash" });
       const prompt = getVayaPrompt(0, []);
       
       console.log('LLM에게 보내는 프롬프트:', prompt);
       
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
+      const text = await generateGeminiText(prompt);
       
       console.log('LLM 응답:', text);
       
@@ -327,14 +331,11 @@ const VayaVoiceChat = ({ isActive, onComplete }) => {
         setIsMessageVisible(true);
         
         try {
-          const model = genAI.current.getGenerativeModel({ model: "gemini-1.5-flash" });
           const prompt = getVayaPrompt(currentStep, newResponses);
           
           console.log('LLM에게 보내는 프롬프트:', prompt);
           
-          const result = await model.generateContent(prompt);
-          const aiResponse = await result.response;
-          const text = aiResponse.text();
+          const text = await generateGeminiText(prompt);
           
           console.log('LLM 응답:', text);
           

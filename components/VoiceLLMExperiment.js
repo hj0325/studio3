@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const VoiceLLMExperiment = ({ isActive, onClose }) => {
   const [isListening, setIsListening] = useState(false);
@@ -18,14 +17,22 @@ const VoiceLLMExperiment = ({ isActive, onClose }) => {
   const [availableVoices, setAvailableVoices] = useState([]);
 
   const recognitionRef = useRef(null);
-  const genAI = useRef(null);
   const utteranceRef = useRef(null);
 
-  // Google Gemini AI 초기화
-  useEffect(() => {
-    if (process.env.NEXT_PUBLIC_GOOGLE_API_KEY) {
-      genAI.current = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GOOGLE_API_KEY);
+  const generateGeminiText = useCallback(async (prompt) => {
+    const response = await fetch('/api/llm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, model: 'gpt-4o-mini' }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const details = data?.details || data?.error || 'Unknown error';
+      throw new Error(details);
     }
+
+    return data?.text || '';
   }, []);
 
   // 음성 목록 로드
@@ -134,13 +141,11 @@ const VoiceLLMExperiment = ({ isActive, onClose }) => {
 
   // LLM 응답 생성
   const generateLLMResponse = useCallback(async (userInput) => {
-    if (!genAI.current || !userInput.trim()) return;
+    if (!userInput.trim()) return;
 
     setIsProcessing(true);
     
     try {
-      const model = genAI.current.getGenerativeModel({ model: "gemini-1.5-flash" });
-      
       // 대화 히스토리를 포함한 프롬프트 생성
       const conversationHistory = conversationLog
         .map(log => `${log.speaker}: ${log.message}`)
@@ -154,9 +159,7 @@ ${conversationHistory ? `이전 대화:\n${conversationHistory}\n\n` : ''}
 
 AI:`;
 
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const responseText = response.text();
+      const responseText = await generateGeminiText(prompt);
       
       setAiResponse(responseText);
       
@@ -178,7 +181,7 @@ AI:`;
     } finally {
       setIsProcessing(false);
     }
-  }, [conversationLog, voiceSettings, availableVoices]);
+  }, [conversationLog, voiceSettings, availableVoices, generateGeminiText]);
 
   // 음성 합성
   const speakResponse = useCallback((text) => {

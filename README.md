@@ -161,19 +161,21 @@ VayaVoiceChat에서 Google의 Neural 음성을 사용하려면 Google Cloud Text
 ### 방법 1: 서비스 계정 JSON 파일 경로 (권장)
 ```bash
 GOOGLE_APPLICATION_CREDENTIALS=/path/to/your/service-account-key.json
-NEXT_PUBLIC_GOOGLE_API_KEY=your_existing_gemini_api_key
+GOOGLE_API_KEY=your_existing_gemini_api_key
 ```
 
 ### 방법 2: 서비스 계정 JSON 내용을 환경변수로
 ```bash
 GOOGLE_SERVICE_ACCOUNT_KEY='{"type":"service_account","project_id":"your-project-id",...}'
-NEXT_PUBLIC_GOOGLE_API_KEY=your_existing_gemini_api_key
+GOOGLE_API_KEY=your_existing_gemini_api_key
 ```
+
+> 참고: 이전에는 `NEXT_PUBLIC_GOOGLE_API_KEY`를 사용했지만, 현재는 브라우저에 키를 노출하지 않기 위해 **서버 전용** `GOOGLE_API_KEY` 사용을 권장합니다.
 
 ## 3. TTS 작동 방식
 
 ✅ **우선순위**: Google Cloud TTS → 브라우저 TTS (fallback)
-✅ **음성 품질**: Google Neural 음성 (ko-KR-Neural2-A)
+✅ **음성 품질**: Google Neural 음성 (ko-KR-Neural2-C)
 ✅ **바야 캐릭터 최적화**: 느리고 차분한 음성 설정
 ✅ **자동 fallback**: Google TTS 실패 시 브라우저 TTS로 자동 전환
 

@@ -4,7 +4,6 @@ import { Inter, Roboto_Mono } from "next/font/google";
 // import styles from "@/styles/Home.module.css"; // 기본 스타일 시트 사용 안 함
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Three.js 컴포넌트를 dynamic import로 클라이언트 사이드에서만 로드
 const SmokeCanvas = dynamic(() => import('../components/SmokeCanvas'), {
@@ -303,7 +302,6 @@ export default function HomePage() {
   const [userResponses, setUserResponses] = useState([]);
 
   const recognitionRef = useRef(null);
-  const genAI = useRef(null);
   const utteranceRef = useRef(null);
 
   const handleScreenClick = useCallback(() => {
@@ -392,11 +390,20 @@ export default function HomePage() {
     };
   }, [handleScreenClick]);
 
-  // Google Gemini AI 초기화
-  useEffect(() => {
-    if (process.env.NEXT_PUBLIC_GOOGLE_API_KEY) {
-      genAI.current = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GOOGLE_API_KEY);
+  const generateGeminiText = useCallback(async (prompt) => {
+    const response = await fetch('/api/llm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, model: 'gpt-4o-mini' }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const details = data?.details || data?.error || 'Unknown error';
+      throw new Error(details);
     }
+
+    return data?.text || '';
   }, []);
 
   // 음성 목록 로드
@@ -666,14 +673,12 @@ export default function HomePage() {
 
   // VAYA 응답 생성 (4단계 시스템)
   const generateVayaResponse = useCallback(async (userInput) => {
-    if (!genAI.current || !userInput.trim() || vayaStage < 1 || vayaStage > 3) return;
+    if (!userInput.trim() || vayaStage < 1 || vayaStage > 3) return;
 
     console.log(`VAYA ${vayaStage}단계 응답 생성:`, userInput);
     setIsProcessing(true);
     
     try {
-      const model = genAI.current.getGenerativeModel({ model: "gemini-1.5-flash" });
-      
       // 사용자 응답 저장
       const newResponses = [...userResponses, userInput];
       setUserResponses(newResponses);
@@ -688,9 +693,7 @@ export default function HomePage() {
       const prompt = getVayaPrompt(vayaStage + 1, newResponses);
       
       console.log('VAYA 프롬프트:', prompt);
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const responseText = response.text();
+      const responseText = await generateGeminiText(prompt);
       
       console.log('VAYA 응답:', responseText);
       setAiResponse(responseText);
@@ -738,7 +741,7 @@ export default function HomePage() {
     } finally {
       setIsProcessing(false);
     }
-  }, [vayaStage, userResponses, getVayaPrompt, isListening]);
+  }, [vayaStage, userResponses, getVayaPrompt, isListening, generateGeminiText]);
 
   // 음성 인식 완료 시 LLM 호출
   useEffect(() => {
@@ -887,8 +890,6 @@ export default function HomePage() {
 
   // VAYA 대화 시작 (첫 번째 자기소개)
   const startVayaConversation = useCallback(async () => {
-    if (!genAI.current) return;
-    
     console.log('VAYA 대화 시작');
     setVayaStage(1);
     setIsProcessing(true);
